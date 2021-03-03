@@ -7,6 +7,9 @@ example:
 myostream::my_ostream<std::ostream> mycout(std::cout.rdbuf());
 std::vector<int> vi{1, 2, 3};
 mycout << vi << std::endl;  // [1, 2, 3]
+std::map<std::string, std::vector<double>> msvd{
+    {"Alice", {95, 87.5}}, {"Bob", {79, 99.5}}};
+mycout << msvd << std::endl;  // {Alice: [95, 87.5], Bob: [79, 99.5]}
 
 // convert to std::string
 myostream::my_ostream<std::ostringstream> myoss;
