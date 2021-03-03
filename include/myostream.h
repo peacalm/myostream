@@ -80,26 +80,28 @@ struct fmt_param_unit {
 
 struct fmt_params {
   fmt_param_unit
-                pair_fmt{"(", ", ", ")"},
+                   pair_fmt{"(", ", ", ")"},
 
-               array_fmt{"[", ", ", "]"},
-               deque_fmt{"[", ", ", "]"},
-        forward_list_fmt{"[", ", ", "]"},
-    initializer_list_fmt{"[", ", ", "]"},
-                list_fmt{"[", ", ", "]"},
-              vector_fmt{"[", ", ", "]"},
+                  array_fmt{"[", ", ", "]"},
+                  deque_fmt{"[", ", ", "]"},
+           forward_list_fmt{"[", ", ", "]"},
+       initializer_list_fmt{"[", ", ", "]"},
+                   list_fmt{"[", ", ", "]"},
+                 vector_fmt{"[", ", ", "]"},
 
-                 set_fmt{"{", ", ", "}"},
-            multiset_fmt{"{", ", ", "}"},
-       unordered_set_fmt{"{", ", ", "}"},
-  unordered_multiset_fmt{"{", ", ", "}"},
+                    set_fmt{"{", ", ", "}"},
+               multiset_fmt{"{", ", ", "}"},
+          unordered_set_fmt{"{", ", ", "}"},
+     unordered_multiset_fmt{"{", ", ", "}"},
 
-                 map_fmt{"{", ", ", "}"},
-              map_kv_fmt{"" , ": ", "" },
-            multimap_fmt{"{", ", ", "}"},
-         multimap_kv_fmt{"" , ": ", "" },
-       unordered_map_fmt{"{", ", ", "}"},
-    unordered_map_kv_fmt{"" , ": ", "" };
+                    map_fmt{"{", ", ", "}"},
+                 map_kv_fmt{"" , ": ", "" },
+               multimap_fmt{"{", ", ", "}"},
+            multimap_kv_fmt{"" , ": ", "" },
+          unordered_map_fmt{"{", ", ", "}"},
+       unordered_map_kv_fmt{"" , ": ", "" },
+     unordered_multimap_fmt{"{", ", ", "}"},
+  unordered_multimap_kv_fmt{"" , ": ", "" };
 };
 
 template <typename OstreamT, typename IteratorT>
