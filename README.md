@@ -1,5 +1,11 @@
-# extension for std::basic_ostream
-support output for all container types.
+# extension for std::basic_ostream in C++
+This lib supports output for all container types, and their composited types.
+You need put a ostream type T as a template parameter, like
+ `myostream::my_ostream<T>`, which indicates where the output writes to.
+What's more, you can specify your preferred left-border, right-border and 
+separator for each container type, or just use the default value.
+
+* C++ standard requirement: >= C++11
 
 example:
 ```c++
