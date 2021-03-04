@@ -1,3 +1,6 @@
+// Author: Shuangquan Li (lishq991@gmail.com)
+// 2021.3 Beijing China
+
 #pragma once
 
 #include <array>
@@ -65,6 +68,9 @@ DECLARE_MY_OSTREAM(map);
 DECLARE_MY_OSTREAM(multimap);
 DECLARE_MY_OSTREAM(unordered_map);
 DECLARE_MY_OSTREAM(unordered_multimap);
+
+template <typename T, typename FmtParamsT = internal::fmt_params>
+std::string tostr(const T& t);
 
 // definitions
 
@@ -191,5 +197,12 @@ DEFINE_MY_OSTREAM_FOR_MAP(unordered_multimap)
 #undef DEFINE_MY_OSTREAM_FOR_MAP
 #undef DEFINE_MY_OSTREAM
 #undef DECLARE_MY_OSTREAM
+
+template <typename T, typename FmtParamsT>
+std::string tostr(const T& t) {
+  my_ostream<std::ostringstream, FmtParamsT> oss;
+  oss << t;
+  return oss.str();
+}
 
 }  // namespace myostream
