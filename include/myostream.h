@@ -12,6 +12,7 @@
 #include <ostream>
 #include <set>
 #include <sstream>
+#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -45,6 +46,14 @@ template <typename OstreamBaseT, typename FmtParamsT,
 my_ostream<OstreamBaseT, FmtParamsT>& operator<<(
     my_ostream<OstreamBaseT, FmtParamsT>& os,
     const std::pair<FirstT, SecondT>& p);
+
+template <typename OstreamBaseT, typename FmtParamsT>
+my_ostream<OstreamBaseT, FmtParamsT>& operator<<(
+    my_ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<>& t);
+
+template <typename OstreamBaseT, typename FmtParamsT, typename ...Args>
+my_ostream<OstreamBaseT, FmtParamsT>& operator<<(
+    my_ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<Args...>& t);
 
 #define DECLARE_MY_OSTREAM(container)                                   \
 template <typename OstreamBaseT, typename FmtParamsT, typename ...Args> \
@@ -87,6 +96,7 @@ struct fmt_param_unit {
 struct fmt_params {
   fmt_param_unit
                    pair_fmt{"(", ", ", ")"},
+                  tuple_fmt{"<", ", ", ">"},
 
                   array_fmt{"[", ", ", "]"},
                   deque_fmt{"[", ", ", "]"},
@@ -138,6 +148,22 @@ OstreamT& output_all(OstreamT& os, IteratorT b, IteratorT e,
   return os;
 }
 
+template <typename OstreamT, typename TupleT, size_t N>
+struct tuple_printer {
+  static void print(OstreamT& os, const TupleT& t) {
+    tuple_printer<OstreamT, TupleT, N - 1>::print(os, t);
+    os << os.fmt.tuple_fmt.sep;
+    os << std::get<N - 1>(t);
+  }
+};
+
+template <typename OstreamT, typename TupleT>
+struct tuple_printer<OstreamT, TupleT, 1> {
+  static void print(OstreamT& os, const TupleT& t) {
+    os << std::get<0>(t);
+  }
+};
+
 }  // namespace internal
 
 template <typename OstreamBaseT, typename FmtParamsT>
@@ -163,6 +189,25 @@ my_ostream<OstreamBaseT, FmtParamsT>& operator<<(
   os << os.fmt.pair_fmt.sep;
   os << p.second;
   os << os.fmt.pair_fmt.rb;
+  return os;
+}
+
+template <typename OstreamBaseT, typename FmtParamsT>
+my_ostream<OstreamBaseT, FmtParamsT>& operator<<(
+    my_ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<>& t) {
+  os << os.fmt.tuple_fmt.lb;
+  os << os.fmt.tuple_fmt.rb;
+  return os;
+}
+
+template <typename OstreamBaseT, typename FmtParamsT, typename ...Args>
+my_ostream<OstreamBaseT, FmtParamsT>& operator<<(
+    my_ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<Args...>& t) {
+  os << os.fmt.tuple_fmt.lb;
+  internal::tuple_printer<
+      my_ostream<OstreamBaseT, FmtParamsT>, std::tuple<Args...>, sizeof...(Args)
+  >::print(os, t);
+  os << os.fmt.tuple_fmt.rb;
   return os;
 }
 
