@@ -28,14 +28,6 @@ struct fmt_param_unit;
 
 struct fmt_params;
 
-template <typename OstreamT, typename IteratorT>
-OstreamT& output_all(OstreamT& os, IteratorT b, IteratorT e,
-                     const fmt_param_unit& f);
-
-template <typename OstreamT, typename IteratorT>
-OstreamT& output_all(OstreamT& os, IteratorT b, IteratorT e,
-                     const fmt_param_unit& f, const fmt_param_unit& kv_f);
-
 }  // namespace internal
 
 template <typename OstreamBaseT, typename FmtParamsT = internal::fmt_params>
@@ -211,15 +203,17 @@ my_ostream<OstreamBaseT, FmtParamsT>& operator<<(
   return os;
 }
 
-#define DEFINE_MY_OSTREAM(container)                                    \
-DECLARE_MY_OSTREAM(container) {                                         \
-  return output_all(os, c.cbegin(), c.cend(), os.fmt.container##_fmt);  \
+#define DEFINE_MY_OSTREAM(container)                      \
+DECLARE_MY_OSTREAM(container) {                           \
+  return internal::output_all(os, c.cbegin(), c.cend(),   \
+                              os.fmt.container##_fmt);    \
 }
 
-#define DEFINE_MY_OSTREAM_FOR_MAP(container)                            \
-DECLARE_MY_OSTREAM(container) {                                         \
-  return output_all(os, c.cbegin(), c.cend(), os.fmt.container##_fmt,   \
-                    os.fmt.container##_kv_fmt);                         \
+#define DEFINE_MY_OSTREAM_FOR_MAP(container)              \
+DECLARE_MY_OSTREAM(container) {                           \
+  return internal::output_all(os, c.cbegin(), c.cend(),   \
+                              os.fmt.container##_fmt,     \
+                              os.fmt.container##_kv_fmt); \
 }
 
 DEFINE_MY_OSTREAM(array)
