@@ -41,8 +41,10 @@ struct fmt_params;
 
 }  // namespace internal
 
-template <typename OstreamBaseT, typename FmtParamsT =
-    internal::fmt_params<std::basic_string<typename OstreamBaseT::char_type>>>
+template <typename OstreamBaseT,
+          typename FmtParamsT = internal::fmt_params<std::basic_string<
+              typename OstreamBaseT::char_type,
+              typename OstreamBaseT::traits_type>>>
 class ostream;
 
 template <typename OstreamBaseT, typename FmtParamsT,
@@ -82,9 +84,14 @@ DECLARE_MY_OSTREAM(multimap);
 DECLARE_MY_OSTREAM(unordered_map);
 DECLARE_MY_OSTREAM(unordered_multimap);
 
-template <typename BasicStringT, typename T,
-    typename FmtParamsT = internal::fmt_params<BasicStringT>>
+template <typename BasicStringT,
+          typename T,
+          typename FmtParamsT = internal::fmt_params<BasicStringT>>
 BasicStringT to_basic_string(const T& t);
+
+template <typename StringT = std::string,
+          typename FmtParamsT = internal::fmt_params<StringT>>
+struct printer;
 
 template <typename T, typename FmtParamsT = internal::fmt_params<std::string>>
 std::string tostr(const T& t);
@@ -275,6 +282,45 @@ BasicStringT to_basic_string(const T& t) {
   oss << t;
   return oss.str();
 }
+
+template <typename StringT, typename FmtParamsT>
+struct printer {
+  using string_type     = StringT;
+  using fmt_params_type = FmtParamsT;
+
+  printer() {}
+  printer(const string_type& lb, const string_type& sep, const string_type& rb)
+    : lb_(lb), sep_(sep), rb_(rb) {}
+
+  printer& with_lb (const string_type& lb)  {lb_  = lb;  return *this;}
+  printer& with_sep(const string_type& sep) {sep_ = sep; return *this;}
+  printer& with_rb (const string_type& rb)  {rb_  = rb;  return *this;}
+
+  template <typename ...Args>
+  typename std::enable_if<sizeof...(Args) != 0, string_type>::type
+  print(const Args&... args) const {
+    return lb_ + __print(args...) + rb_;
+  }
+
+  string_type print() const { return lb_ + rb_; }
+
+private:
+  template <typename T>
+  string_type
+  __print(const T& t) const {
+    return to_basic_string<string_type, T, fmt_params_type>(t);
+  }
+
+  template <typename T, typename ...Args>
+  typename std::enable_if<sizeof...(Args) != 0, string_type>::type
+  __print(const T& t, const Args&... args) const {
+    return __print(t) + sep_ + __print(args...);
+  }
+
+  string_type lb_;
+  string_type sep_{',', ' '};
+  string_type rb_;
+};
 
 template <typename T, typename FmtParamsT>
 std::string tostr(const T& t) {
