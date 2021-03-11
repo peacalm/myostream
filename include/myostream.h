@@ -36,13 +36,13 @@ namespace myostream {
 
 namespace internal {
 
-struct fmt_param_unit;
-
+template <typename CharT>
 struct fmt_params;
 
 }  // namespace internal
 
-template <typename OstreamBaseT, typename FmtParamsT = internal::fmt_params>
+template <typename OstreamBaseT, typename FmtParamsT =
+    internal::fmt_params<typename OstreamBaseT::char_type>>
 class ostream;
 
 template <typename OstreamBaseT, typename FmtParamsT,
@@ -82,51 +82,58 @@ DECLARE_MY_OSTREAM(multimap);
 DECLARE_MY_OSTREAM(unordered_map);
 DECLARE_MY_OSTREAM(unordered_multimap);
 
-template <typename T, typename FmtParamsT = internal::fmt_params>
+template <typename T, typename FmtParamsT = internal::fmt_params<char>>
 std::string tostr(const T& t);
 
 // definitions
 
 namespace internal {
 
-struct fmt_param_unit {
-  fmt_param_unit(const char* left_border, const char* separator,
-                 const char* right_border)
+template <typename CharT> struct fmt_param_unit {
+  using char_type   = CharT;
+  using string_type = std::basic_string<char_type>;
+
+  fmt_param_unit(const string_type& left_border,
+                 const string_type& separator,
+                 const string_type& right_border)
       : lb(left_border), sep(separator), rb(right_border) {}
 
-  std::string lb, sep, rb;
+  string_type lb, sep, rb;
 };
 
-struct fmt_params {
-  fmt_param_unit
-                   pair_fmt{"(", ", ", ")"},
-                  tuple_fmt{"<", ", ", ">"},
+template <typename CharT> struct fmt_params {
+  using char_type   = CharT;
+  using string_type = std::basic_string<char_type>;
 
-                  array_fmt{"[", ", ", "]"},
-                  deque_fmt{"[", ", ", "]"},
-           forward_list_fmt{"[", ", ", "]"},
-       initializer_list_fmt{"[", ", ", "]"},
-                   list_fmt{"[", ", ", "]"},
-                 vector_fmt{"[", ", ", "]"},
+  fmt_param_unit<char_type>
+                   pair_fmt{{'('}, {',', ' '}, {')'}},
+                  tuple_fmt{{'<'}, {',', ' '}, {'>'}},
 
-                    set_fmt{"{", ", ", "}"},
-               multiset_fmt{"{", ", ", "}"},
-          unordered_set_fmt{"{", ", ", "}"},
-     unordered_multiset_fmt{"{", ", ", "}"},
+                  array_fmt{{'['}, {',', ' '}, {']'}},
+                  deque_fmt{{'['}, {',', ' '}, {']'}},
+           forward_list_fmt{{'['}, {',', ' '}, {']'}},
+       initializer_list_fmt{{'['}, {',', ' '}, {']'}},
+                   list_fmt{{'['}, {',', ' '}, {']'}},
+                 vector_fmt{{'['}, {',', ' '}, {']'}},
 
-                    map_fmt{"{", ", ", "}"},
-                 map_kv_fmt{"" , ": ", "" },
-               multimap_fmt{"{", ", ", "}"},
-            multimap_kv_fmt{"" , ": ", "" },
-          unordered_map_fmt{"{", ", ", "}"},
-       unordered_map_kv_fmt{"" , ": ", "" },
-     unordered_multimap_fmt{"{", ", ", "}"},
-  unordered_multimap_kv_fmt{"" , ": ", "" };
+                    set_fmt{{'{'}, {',', ' '}, {'}'}},
+               multiset_fmt{{'{'}, {',', ' '}, {'}'}},
+          unordered_set_fmt{{'{'}, {',', ' '}, {'}'}},
+     unordered_multiset_fmt{{'{'}, {',', ' '}, {'}'}},
+
+                    map_fmt{{'{'}, {',', ' '}, {'}'}},
+                 map_kv_fmt{{},    {':', ' '}, {}   },
+               multimap_fmt{{'{'}, {',', ' '}, {'}'}},
+            multimap_kv_fmt{{},    {':', ' '}, {}   },
+          unordered_map_fmt{{'{'}, {',', ' '}, {'}'}},
+       unordered_map_kv_fmt{{},    {':', ' '}, {}   },
+     unordered_multimap_fmt{{'{'}, {',', ' '}, {'}'}},
+  unordered_multimap_kv_fmt{{},    {':', ' '}, {}   };
 };
 
 template <typename OstreamT, typename IteratorT>
 OstreamT& output_all(OstreamT& os, IteratorT b, IteratorT e,
-                     const fmt_param_unit& f) {
+                     const fmt_param_unit<typename OstreamT::char_type>& f) {
   os << f.lb;
   for (IteratorT it = b; it != e; ++it) {
     if (it != b) os << f.sep;
@@ -138,7 +145,8 @@ OstreamT& output_all(OstreamT& os, IteratorT b, IteratorT e,
 
 template <typename OstreamT, typename IteratorT>
 OstreamT& output_all(OstreamT& os, IteratorT b, IteratorT e,
-                     const fmt_param_unit& f, const fmt_param_unit& kv_f) {
+                     const fmt_param_unit<typename OstreamT::char_type>& f,
+                     const fmt_param_unit<typename OstreamT::char_type>& kv_f) {
   os << f.lb;
   for (IteratorT it = b; it != e; ++it) {
     if (it != b) os << f.sep;
@@ -172,14 +180,14 @@ struct tuple_printer<OstreamT, TupleT, 1> {
 
 template <typename OstreamBaseT, typename FmtParamsT>
 class ostream : public OstreamBaseT {
-  using base_t       = OstreamBaseT;
-  using fmt_params_t = FmtParamsT;
+  using base_type       = OstreamBaseT;
+  using fmt_params_type = FmtParamsT;
 
 public:
   template <typename ...Args>
-  explicit ostream(Args&&... args) : base_t(std::forward<Args>(args)...) {}
+  explicit ostream(Args&&... args) : base_type(std::forward<Args>(args)...) {}
 
-  fmt_params_t fmt;
+  fmt_params_type fmt;
 };
 
 
