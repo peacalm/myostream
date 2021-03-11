@@ -116,8 +116,9 @@ template <typename StringT> struct fmt_param_unit {
 };
 
 template <typename StringT> struct fmt_params {
-  using string_type = StringT;
-  using char_type   = typename string_type::value_type;
+  using string_type         = StringT;
+  using char_type           = typename string_type::value_type;
+  using fmt_param_unit_type = fmt_param_unit<string_type>;
 
   fmt_param_unit<string_type>
                    pair_fmt{{'('}, {',', ' '}, {')'}},
@@ -145,9 +146,9 @@ template <typename StringT> struct fmt_params {
   unordered_multimap_kv_fmt{{},    {':', ' '}, {}   };
 };
 
-template <typename OstreamT, typename IteratorT>
+template <typename OstreamT, typename IteratorT, typename FmtParamUnitT>
 OstreamT& output_all(OstreamT& os, IteratorT b, IteratorT e,
-                     const fmt_param_unit<typename OstreamT::char_type>& f) {
+                     const FmtParamUnitT& f) {
   os << f.lb;
   for (IteratorT it = b; it != e; ++it) {
     if (it != b) os << f.sep;
@@ -157,10 +158,9 @@ OstreamT& output_all(OstreamT& os, IteratorT b, IteratorT e,
   return os;
 }
 
-template <typename OstreamT, typename IteratorT>
+template <typename OstreamT, typename IteratorT, typename FmtParamUnitT>
 OstreamT& output_all(OstreamT& os, IteratorT b, IteratorT e,
-                     const fmt_param_unit<typename OstreamT::char_type>& f,
-                     const fmt_param_unit<typename OstreamT::char_type>& kv_f) {
+                     const FmtParamUnitT& f, const FmtParamUnitT& kv_f) {
   os << f.lb;
   for (IteratorT it = b; it != e; ++it) {
     if (it != b) os << f.sep;
@@ -278,7 +278,7 @@ BasicStringT to_basic_string(const T& t) {
       typename BasicStringT::value_type,
       typename BasicStringT::traits_type,
       typename BasicStringT::allocator_type>;
-  ostream<base_oss_t, FmtParamsT()> oss;
+  ostream<base_oss_t, FmtParamsT> oss;
   oss << t;
   return oss.str();
 }
