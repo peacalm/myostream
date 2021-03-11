@@ -61,8 +61,8 @@ ostream<OstreamBaseT, FmtParamsT>& operator<<(
 
 #define DECLARE_MY_OSTREAM(container)                                   \
 template <typename OstreamBaseT, typename FmtParamsT, typename ...Args> \
-ostream<OstreamBaseT, FmtParamsT>& operator<<(                       \
-    ostream<OstreamBaseT, FmtParamsT>& os,                           \
+ostream<OstreamBaseT, FmtParamsT>& operator<<(                          \
+    ostream<OstreamBaseT, FmtParamsT>& os,                              \
     const std::container<Args...>& c)
 
 DECLARE_MY_OSTREAM(array);
