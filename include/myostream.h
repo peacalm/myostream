@@ -36,13 +36,13 @@ namespace myostream {
 
 namespace internal {
 
-template <typename CharT>
+template <typename StringT>
 struct fmt_params;
 
 }  // namespace internal
 
 template <typename OstreamBaseT, typename FmtParamsT =
-    internal::fmt_params<typename OstreamBaseT::char_type>>
+    internal::fmt_params<std::basic_string<typename OstreamBaseT::char_type>>>
 class ostream;
 
 template <typename OstreamBaseT, typename FmtParamsT,
@@ -82,16 +82,23 @@ DECLARE_MY_OSTREAM(multimap);
 DECLARE_MY_OSTREAM(unordered_map);
 DECLARE_MY_OSTREAM(unordered_multimap);
 
-template <typename T, typename FmtParamsT = internal::fmt_params<char>>
+template <typename BasicStringT, typename T,
+    typename FmtParamsT = internal::fmt_params<BasicStringT>>
+BasicStringT to_basic_string(const T& t);
+
+template <typename T, typename FmtParamsT = internal::fmt_params<std::string>>
 std::string tostr(const T& t);
+
+template <typename T, typename FmtParamsT = internal::fmt_params<std::wstring>>
+std::wstring towstr(const T& t);
 
 // definitions
 
 namespace internal {
 
-template <typename CharT> struct fmt_param_unit {
-  using char_type   = CharT;
-  using string_type = std::basic_string<char_type>;
+template <typename StringT> struct fmt_param_unit {
+  using string_type = StringT;
+  using char_type   = typename string_type::value_type;
 
   fmt_param_unit(const string_type& left_border,
                  const string_type& separator,
@@ -101,11 +108,11 @@ template <typename CharT> struct fmt_param_unit {
   string_type lb, sep, rb;
 };
 
-template <typename CharT> struct fmt_params {
-  using char_type   = CharT;
-  using string_type = std::basic_string<char_type>;
+template <typename StringT> struct fmt_params {
+  using string_type = StringT;
+  using char_type   = typename string_type::value_type;
 
-  fmt_param_unit<char_type>
+  fmt_param_unit<string_type>
                    pair_fmt{{'('}, {',', ' '}, {')'}},
                   tuple_fmt{{'<'}, {',', ' '}, {'>'}},
 
@@ -257,11 +264,28 @@ DEFINE_MY_OSTREAM_FOR_MAP(unordered_multimap)
 #undef DEFINE_MY_OSTREAM
 #undef DECLARE_MY_OSTREAM
 
+
+template <typename BasicStringT, typename T, typename FmtParamsT>
+BasicStringT to_basic_string(const T& t) {
+  using base_oss_t = std::basic_ostringstream<
+      typename BasicStringT::value_type,
+      typename BasicStringT::traits_type,
+      typename BasicStringT::allocator_type>;
+  ostream<base_oss_t, FmtParamsT()> oss;
+  oss << t;
+  return oss.str();
+}
+
 template <typename T, typename FmtParamsT>
 std::string tostr(const T& t) {
   ostream<std::ostringstream, FmtParamsT> oss;
   oss << t;
   return oss.str();
+}
+
+template <typename T, typename FmtParamsT>
+std::wstring towstr(const T& t) {
+  return to_basic_string<std::wstring, T, FmtParamsT>(t);
 }
 
 }  // namespace myostream
