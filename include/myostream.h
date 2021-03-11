@@ -84,8 +84,7 @@ DECLARE_MY_OSTREAM(multimap);
 DECLARE_MY_OSTREAM(unordered_map);
 DECLARE_MY_OSTREAM(unordered_multimap);
 
-template <typename BasicStringT,
-          typename T,
+template <typename BasicStringT, typename T,
           typename FmtParamsT = internal::fmt_params<BasicStringT>>
 BasicStringT to_basic_string(const T& t);
 
