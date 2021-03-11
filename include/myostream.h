@@ -42,26 +42,26 @@ struct fmt_params;
 }  // namespace internal
 
 template <typename OstreamBaseT, typename FmtParamsT = internal::fmt_params>
-class my_ostream;
+class ostream;
 
 template <typename OstreamBaseT, typename FmtParamsT,
           typename FirstT, typename SecondT>
-my_ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    my_ostream<OstreamBaseT, FmtParamsT>& os,
+ostream<OstreamBaseT, FmtParamsT>& operator<<(
+    ostream<OstreamBaseT, FmtParamsT>& os,
     const std::pair<FirstT, SecondT>& p);
 
 template <typename OstreamBaseT, typename FmtParamsT>
-my_ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    my_ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<>& t);
+ostream<OstreamBaseT, FmtParamsT>& operator<<(
+    ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<>& t);
 
 template <typename OstreamBaseT, typename FmtParamsT, typename ...Args>
-my_ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    my_ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<Args...>& t);
+ostream<OstreamBaseT, FmtParamsT>& operator<<(
+    ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<Args...>& t);
 
 #define DECLARE_MY_OSTREAM(container)                                   \
 template <typename OstreamBaseT, typename FmtParamsT, typename ...Args> \
-my_ostream<OstreamBaseT, FmtParamsT>& operator<<(                       \
-    my_ostream<OstreamBaseT, FmtParamsT>& os,                           \
+ostream<OstreamBaseT, FmtParamsT>& operator<<(                       \
+    ostream<OstreamBaseT, FmtParamsT>& os,                           \
     const std::container<Args...>& c)
 
 DECLARE_MY_OSTREAM(array);
@@ -170,13 +170,13 @@ struct tuple_printer<OstreamT, TupleT, 1> {
 }  // namespace internal
 
 template <typename OstreamBaseT, typename FmtParamsT>
-class my_ostream : public OstreamBaseT {
+class ostream : public OstreamBaseT {
   using base_t       = OstreamBaseT;
   using fmt_params_t = FmtParamsT;
 
 public:
   template <typename ...Args>
-  explicit my_ostream(Args&&... args) : base_t(std::forward<Args>(args)...) {}
+  explicit ostream(Args&&... args) : base_t(std::forward<Args>(args)...) {}
 
   fmt_params_t fmt;
 };
@@ -184,8 +184,8 @@ public:
 
 template <typename OstreamBaseT, typename FmtParamsT,
     typename FirstT, typename SecondT>
-my_ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    my_ostream<OstreamBaseT, FmtParamsT>& os,
+ostream<OstreamBaseT, FmtParamsT>& operator<<(
+    ostream<OstreamBaseT, FmtParamsT>& os,
     const std::pair<FirstT, SecondT>& p) {
   os << os.fmt.pair_fmt.lb;
   os << p.first;
@@ -196,19 +196,19 @@ my_ostream<OstreamBaseT, FmtParamsT>& operator<<(
 }
 
 template <typename OstreamBaseT, typename FmtParamsT>
-my_ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    my_ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<>& t) {
+ostream<OstreamBaseT, FmtParamsT>& operator<<(
+    ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<>& t) {
   os << os.fmt.tuple_fmt.lb;
   os << os.fmt.tuple_fmt.rb;
   return os;
 }
 
 template <typename OstreamBaseT, typename FmtParamsT, typename ...Args>
-my_ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    my_ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<Args...>& t) {
+ostream<OstreamBaseT, FmtParamsT>& operator<<(
+    ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<Args...>& t) {
   os << os.fmt.tuple_fmt.lb;
   internal::tuple_printer<
-      my_ostream<OstreamBaseT, FmtParamsT>, std::tuple<Args...>, sizeof...(Args)
+      ostream<OstreamBaseT, FmtParamsT>, std::tuple<Args...>, sizeof...(Args)
   >::print(os, t);
   os << os.fmt.tuple_fmt.rb;
   return os;
@@ -250,7 +250,7 @@ DEFINE_MY_OSTREAM_FOR_MAP(unordered_multimap)
 
 template <typename T, typename FmtParamsT>
 std::string tostr(const T& t) {
-  my_ostream<std::ostringstream, FmtParamsT> oss;
+  ostream<std::ostringstream, FmtParamsT> oss;
   oss << t;
   return oss.str();
 }
