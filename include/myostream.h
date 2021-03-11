@@ -92,11 +92,11 @@ template <typename StringT = std::string,
           typename FmtParamsT = internal::fmt_params<StringT>>
 struct printer;
 
-template <typename T, typename FmtParamsT = internal::fmt_params<std::string>>
-std::string tostr(const T& t);
+template <typename ...Args>
+std::string tostr(const Args&... args);
 
-template <typename T, typename FmtParamsT = internal::fmt_params<std::wstring>>
-std::wstring towstr(const T& t);
+template <typename ...Args>
+std::wstring towstr(const Args&... args);
 
 // definitions
 
@@ -305,8 +305,7 @@ struct printer {
 
 private:
   template <typename T>
-  string_type
-  __print(const T& t) const {
+  string_type __print(const T& t) const {
     return to_basic_string<string_type, T, fmt_params_type>(t);
   }
 
@@ -321,16 +320,14 @@ private:
   string_type rb_;
 };
 
-template <typename T, typename FmtParamsT>
-std::string tostr(const T& t) {
-  ostream<std::ostringstream, FmtParamsT> oss;
-  oss << t;
-  return oss.str();
+template <typename ...Args>
+std::string tostr(const Args&... args) {
+  return printer<std::string>{}.print(args...);
 }
 
-template <typename T, typename FmtParamsT>
-std::wstring towstr(const T& t) {
-  return to_basic_string<std::wstring, T, FmtParamsT>(t);
+template <typename ...Args>
+std::wstring towstr(const Args&... args) {
+  return printer<std::wstring>{}.print(args...);
 }
 
 }  // namespace myostream
