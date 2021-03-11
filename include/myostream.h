@@ -109,7 +109,7 @@ template <typename StringT> struct fmt_param_unit {
   fmt_param_unit(const string_type& left_border,
                  const string_type& separator,
                  const string_type& right_border)
-      : lb(left_border), sep(separator), rb(right_border) {}
+    : lb(left_border), sep(separator), rb(right_border) {}
 
   string_type lb, sep, rb;
 };
