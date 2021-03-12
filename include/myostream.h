@@ -92,9 +92,11 @@ template <typename StringT = std::string,
           typename FmtParamsT = internal::fmt_params<StringT>>
 struct printer;
 
+//! convert all `args` into std::string joined with `", "`
 template <typename ...Args>
 std::string tostr(const Args&... args);
 
+//! convert all `args` into std::wstring joined with `L", "`
 template <typename ...Args>
 std::wstring towstr(const Args&... args);
 
