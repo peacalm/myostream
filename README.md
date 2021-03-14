@@ -37,7 +37,7 @@ one line code to convert many arguments into std::string, seperated by ", ".
 example:
 ```c++
 std::vector<int> vi{1, 2, 3};
-cout << myostream::tostr("show \"tostr\"", vi) << std::endl;
+std::cout << myostream::tostr("show \"tostr\"", vi) << std::endl;
 // show "tostr", [1, 2, 3]
 ```
 
@@ -50,8 +50,12 @@ separator when printing many arguments.
 example:
 ```c++
 std::vector<int> vi{1, 2, 3};
-cout << myostream::printer<>{}.print(100, vi) << endl;  // 100, [1, 2, 3]
-cout << myostream::printer<>{"|", "-", "|"}.print(1, 2, 3) << endl;  // |1-2-3|
-cout << myostream::printer<>{}.with_lb("<!--").with_sep(" ").with_rb("-->")
-    .print(1, 2.5, "string") << endl;  // <!--1 2.5 string-->
+std::cout << myostream::printer<>{}.print(100, vi) << std::endl;
+// 100, [1, 2, 3]
+std::cout << myostream::printer<>{"|", "-", "|"}.print(1, 2, 3) << std::endl;
+// |1-2-3|
+std::cout << myostream::printer<>{}
+    .with_lb("<!--").with_sep(" ").with_rb("-->")
+    .print(1, 2.5, "string") << std::endl;
+// <!--1 2.5 string-->
 ```
