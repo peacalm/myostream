@@ -32,7 +32,7 @@
 
 namespace myostream {
 
-// declarations
+// ==================== declarations ====================
 
 namespace internal {
 
@@ -100,7 +100,7 @@ std::string tostr(const Args&... args);
 template <typename ...Args>
 std::wstring towstr(const Args&... args);
 
-// definitions
+// ==================== definitions ====================
 
 namespace internal {
 
