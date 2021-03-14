@@ -10,8 +10,8 @@ usages:
 You need to put at least an `OstreamBaseType` into template parameter as a base 
 class, e.g. `myostream::ostream<std::ostringstream>`, which indicates where the 
 output writes to. 
-What's more, you can the optional second template parameter `FmtParamsType` to 
-specify your preferred left-border, right-border and separator for each 
+What's more, you can put an optional second template parameter `FmtParamsType` 
+to specify your preferred left-border, right-border and separator for each 
 container type, or just use the default value.
 
 example:
