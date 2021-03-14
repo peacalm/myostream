@@ -138,13 +138,13 @@ template <typename StringT> struct fmt_params {
      unordered_multiset_fmt{{'{'}, {',', ' '}, {'}'}},
 
                     map_fmt{{'{'}, {',', ' '}, {'}'}},
-                 map_kv_fmt{{},    {':', ' '}, {}   },
+                 map_kv_fmt{{   }, {':', ' '}, {   }},
                multimap_fmt{{'{'}, {',', ' '}, {'}'}},
-            multimap_kv_fmt{{},    {':', ' '}, {}   },
+            multimap_kv_fmt{{   }, {':', ' '}, {   }},
           unordered_map_fmt{{'{'}, {',', ' '}, {'}'}},
-       unordered_map_kv_fmt{{},    {':', ' '}, {}   },
+       unordered_map_kv_fmt{{   }, {':', ' '}, {   }},
      unordered_multimap_fmt{{'{'}, {',', ' '}, {'}'}},
-  unordered_multimap_kv_fmt{{},    {':', ' '}, {}   };
+  unordered_multimap_kv_fmt{{   }, {':', ' '}, {   }};
 };
 
 template <typename OstreamT, typename IteratorT, typename FmtParamUnitT>
