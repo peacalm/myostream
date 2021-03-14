@@ -33,7 +33,8 @@ std::cout << myoss.str() << std::endl;  // [{1, 2, 3}, {100, 200}]
 ```
 
 ## myostream::tostr(const Args&... args)
-one line code to convert many arguments into std::string, seperated by ", ". 
+one line code to convert many arguments into std::string, seperated by ", ".
+
 example:
 ```c++
 std::vector<int> vi{1, 2, 3};
@@ -47,6 +48,7 @@ all same as `myostream::tostr` except result into std::wstring type.
 ## myostream::printer<StringT=std::string, FmtParamsT=fmt_params>
 like `myostream::tostr`, but you can specify left-border, right-border and 
 separator when printing many arguments.
+
 example:
 ```c++
 std::vector<int> vi{1, 2, 3};
