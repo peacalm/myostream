@@ -33,7 +33,7 @@ std::cout << myoss.str() << std::endl;  // [{1, 2, 3}, {100, 200}]
 ```
 
 ## myostream::tostr(const Args&... args)
-one line code to convert many arguments into std::string, seperated by ", ".
+one line code to convert many arguments into std::string, seperated by ", ". 
 example:
 ```c++
 std::vector<int> vi{1, 2, 3};
