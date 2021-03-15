@@ -121,6 +121,7 @@ template <typename StringT> struct fmt_params {
   using char_type           = typename string_type::value_type;
   using fmt_param_unit_type = fmt_param_unit<string_type>;
 
+  // clang-format off
   fmt_param_unit<string_type>
                    pair_fmt{{'('}, {',', ' '}, {')'}},
                   tuple_fmt{{'<'}, {',', ' '}, {'>'}},
@@ -145,6 +146,7 @@ template <typename StringT> struct fmt_params {
        unordered_map_kv_fmt{{   }, {':', ' '}, {   }},
      unordered_multimap_fmt{{'{'}, {',', ' '}, {'}'}},
   unordered_multimap_kv_fmt{{   }, {':', ' '}, {   }};
+  // clang-format on
 };
 
 template <typename OstreamT, typename IteratorT, typename FmtParamUnitT>
