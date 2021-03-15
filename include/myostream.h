@@ -41,31 +41,29 @@ struct fmt_params;
 
 }  // namespace internal
 
-template <typename OstreamBaseT,
-          typename FmtParamsT = internal::fmt_params<std::basic_string<
-              typename OstreamBaseT::char_type,
-              typename OstreamBaseT::traits_type>>>
+template <
+    typename OstreamBaseT,
+    typename FmtParamsT = internal::fmt_params<std::basic_string<
+        typename OstreamBaseT::char_type, typename OstreamBaseT::traits_type>>>
 class ostream;
 
-template <typename OstreamBaseT, typename FmtParamsT,
-          typename FirstT, typename SecondT>
+template <typename OstreamBaseT, typename FmtParamsT, typename FirstT,
+          typename SecondT>
 ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    ostream<OstreamBaseT, FmtParamsT>& os,
-    const std::pair<FirstT, SecondT>& p);
+    ostream<OstreamBaseT, FmtParamsT>& os, const std::pair<FirstT, SecondT>& p);
 
 template <typename OstreamBaseT, typename FmtParamsT>
 ostream<OstreamBaseT, FmtParamsT>& operator<<(
     ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<>& t);
 
-template <typename OstreamBaseT, typename FmtParamsT, typename ...Args>
+template <typename OstreamBaseT, typename FmtParamsT, typename... Args>
 ostream<OstreamBaseT, FmtParamsT>& operator<<(
     ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<Args...>& t);
 
-#define DECLARE_MY_OSTREAM(container)                                   \
-template <typename OstreamBaseT, typename FmtParamsT, typename ...Args> \
-ostream<OstreamBaseT, FmtParamsT>& operator<<(                          \
-    ostream<OstreamBaseT, FmtParamsT>& os,                              \
-    const std::container<Args...>& c)
+#define DECLARE_MY_OSTREAM(container)                                     \
+  template <typename OstreamBaseT, typename FmtParamsT, typename... Args> \
+  ostream<OstreamBaseT, FmtParamsT>& operator<<(                          \
+      ostream<OstreamBaseT, FmtParamsT>& os, const std::container<Args...>& c)
 
 DECLARE_MY_OSTREAM(array);
 DECLARE_MY_OSTREAM(deque);
@@ -88,35 +86,36 @@ template <typename BasicStringT, typename T,
           typename FmtParamsT = internal::fmt_params<BasicStringT>>
 BasicStringT to_basic_string(const T& t);
 
-template <typename StringT = std::string,
+template <typename StringT    = std::string,
           typename FmtParamsT = internal::fmt_params<StringT>>
 struct printer;
 
 //! convert all `args` into std::string joined with `", "`
-template <typename ...Args>
+template <typename... Args>
 std::string tostr(const Args&... args);
 
 //! convert all `args` into std::wstring joined with `L", "`
-template <typename ...Args>
+template <typename... Args>
 std::wstring towstr(const Args&... args);
 
 // ==================== definitions ====================
 
 namespace internal {
 
-template <typename StringT> struct fmt_param_unit {
+template <typename StringT>
+struct fmt_param_unit {
   using string_type = StringT;
   using char_type   = typename string_type::value_type;
 
-  fmt_param_unit(const string_type& left_border,
-                 const string_type& separator,
+  fmt_param_unit(const string_type& left_border, const string_type& separator,
                  const string_type& right_border)
-    : lb(left_border), sep(separator), rb(right_border) {}
+      : lb(left_border), sep(separator), rb(right_border) {}
 
   string_type lb, sep, rb;
 };
 
-template <typename StringT> struct fmt_params {
+template <typename StringT>
+struct fmt_params {
   using string_type         = StringT;
   using char_type           = typename string_type::value_type;
   using fmt_param_unit_type = fmt_param_unit<string_type>;
@@ -188,9 +187,7 @@ struct tuple_printer {
 
 template <typename OstreamT, typename TupleT>
 struct tuple_printer<OstreamT, TupleT, 1> {
-  static void print(OstreamT& os, const TupleT& t) {
-    os << std::get<0>(t);
-  }
+  static void print(OstreamT& os, const TupleT& t) { os << std::get<0>(t); }
 };
 
 }  // namespace internal
@@ -201,18 +198,17 @@ class ostream : public OstreamBaseT {
   using fmt_params_type = FmtParamsT;
 
 public:
-  template <typename ...Args>
+  template <typename... Args>
   explicit ostream(Args&&... args) : base_type(std::forward<Args>(args)...) {}
 
   fmt_params_type fmt;
 };
 
-
-template <typename OstreamBaseT, typename FmtParamsT,
-    typename FirstT, typename SecondT>
+template <typename OstreamBaseT, typename FmtParamsT, typename FirstT,
+          typename SecondT>
 ostream<OstreamBaseT, FmtParamsT>& operator<<(
     ostream<OstreamBaseT, FmtParamsT>& os,
-    const std::pair<FirstT, SecondT>& p) {
+    const std::pair<FirstT, SecondT>&  p) {
   os << os.fmt.pair_fmt.lb;
   os << p.first;
   os << os.fmt.pair_fmt.sep;
@@ -229,29 +225,28 @@ ostream<OstreamBaseT, FmtParamsT>& operator<<(
   return os;
 }
 
-template <typename OstreamBaseT, typename FmtParamsT, typename ...Args>
+template <typename OstreamBaseT, typename FmtParamsT, typename... Args>
 ostream<OstreamBaseT, FmtParamsT>& operator<<(
     ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<Args...>& t) {
   os << os.fmt.tuple_fmt.lb;
-  internal::tuple_printer<
-      ostream<OstreamBaseT, FmtParamsT>, std::tuple<Args...>, sizeof...(Args)
-  >::print(os, t);
+  internal::tuple_printer<ostream<OstreamBaseT, FmtParamsT>,
+                          std::tuple<Args...>, sizeof...(Args)>::print(os, t);
   os << os.fmt.tuple_fmt.rb;
   return os;
 }
 
 #define DEFINE_MY_OSTREAM(container)                      \
-DECLARE_MY_OSTREAM(container) {                           \
-  return internal::output_all(os, c.cbegin(), c.cend(),   \
-                              os.fmt.container##_fmt);    \
-}
+  DECLARE_MY_OSTREAM(container) {                         \
+    return internal::output_all(os, c.cbegin(), c.cend(), \
+                                os.fmt.container##_fmt);  \
+  }
 
-#define DEFINE_MY_OSTREAM_FOR_MAP(container)              \
-DECLARE_MY_OSTREAM(container) {                           \
-  return internal::output_all(os, c.cbegin(), c.cend(),   \
-                              os.fmt.container##_fmt,     \
-                              os.fmt.container##_kv_fmt); \
-}
+#define DEFINE_MY_OSTREAM_FOR_MAP(container)                \
+  DECLARE_MY_OSTREAM(container) {                           \
+    return internal::output_all(os, c.cbegin(), c.cend(),   \
+                                os.fmt.container##_fmt,     \
+                                os.fmt.container##_kv_fmt); \
+  }
 
 DEFINE_MY_OSTREAM(array)
 DEFINE_MY_OSTREAM(deque)
@@ -274,13 +269,12 @@ DEFINE_MY_OSTREAM_FOR_MAP(unordered_multimap)
 #undef DEFINE_MY_OSTREAM
 #undef DECLARE_MY_OSTREAM
 
-
 template <typename BasicStringT, typename T, typename FmtParamsT>
 BasicStringT to_basic_string(const T& t) {
-  using base_oss_t = std::basic_ostringstream<
-      typename BasicStringT::value_type,
-      typename BasicStringT::traits_type,
-      typename BasicStringT::allocator_type>;
+  using base_oss_t =
+      std::basic_ostringstream<typename BasicStringT::value_type,
+                               typename BasicStringT::traits_type,
+                               typename BasicStringT::allocator_type>;
   ostream<base_oss_t, FmtParamsT> oss;
   oss << t;
   return oss.str();
@@ -293,7 +287,7 @@ struct printer {
 
   printer() {}
   printer(const string_type& lb, const string_type& sep, const string_type& rb)
-    : lb_(lb), sep_(sep), rb_(rb) {}
+      : lb_(lb), sep_(sep), rb_(rb) {}
 
   // clang-format off
   printer& with_lb (const string_type& lb)  {lb_  = lb;  return *this;}
@@ -301,9 +295,9 @@ struct printer {
   printer& with_rb (const string_type& rb)  {rb_  = rb;  return *this;}
   // clang-format on
 
-  template <typename ...Args>
-  typename std::enable_if<sizeof...(Args) != 0, string_type>::type
-  print(const Args&... args) const {
+  template <typename... Args>
+  typename std::enable_if<sizeof...(Args) != 0, string_type>::type print(
+      const Args&... args) const {
     return lb_ + __print(args...) + rb_;
   }
 
@@ -315,9 +309,9 @@ private:
     return to_basic_string<string_type, T, fmt_params_type>(t);
   }
 
-  template <typename T, typename ...Args>
-  typename std::enable_if<sizeof...(Args) != 0, string_type>::type
-  __print(const T& t, const Args&... args) const {
+  template <typename T, typename... Args>
+  typename std::enable_if<sizeof...(Args) != 0, string_type>::type __print(
+      const T& t, const Args&... args) const {
     return __print(t) + sep_ + __print(args...);
   }
 
@@ -326,12 +320,12 @@ private:
   string_type rb_;
 };
 
-template <typename ...Args>
+template <typename... Args>
 std::string tostr(const Args&... args) {
   return printer<std::string>{}.print(args...);
 }
 
-template <typename ...Args>
+template <typename... Args>
 std::wstring towstr(const Args&... args) {
   return printer<std::wstring>{}.print(args...);
 }
