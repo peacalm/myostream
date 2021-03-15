@@ -295,9 +295,11 @@ struct printer {
   printer(const string_type& lb, const string_type& sep, const string_type& rb)
     : lb_(lb), sep_(sep), rb_(rb) {}
 
+  // clang-format off
   printer& with_lb (const string_type& lb)  {lb_  = lb;  return *this;}
   printer& with_sep(const string_type& sep) {sep_ = sep; return *this;}
   printer& with_rb (const string_type& rb)  {rb_  = rb;  return *this;}
+  // clang-format on
 
   template <typename ...Args>
   typename std::enable_if<sizeof...(Args) != 0, string_type>::type
