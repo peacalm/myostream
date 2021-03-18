@@ -34,6 +34,8 @@ namespace myostream {
 
 // ==================== declarations ====================
 
+// types
+
 namespace internal {
 
 template <typename StringT>
@@ -47,11 +49,28 @@ template <
         typename OstreamBaseT::char_type, typename OstreamBaseT::traits_type>>>
 class basic_ostream;
 
+using ostream  = basic_ostream<std::ostream>;
+using wostream = basic_ostream<std::wostream>;
+
+template <typename StringT>
+using std_basic_ostringstream =
+    std::basic_ostringstream<typename StringT::value_type,
+                             typename StringT::traits_type,
+                             typename StringT::allocator_type>;
+template <typename StringT>
+using basic_ostringstream = basic_ostream<std_basic_ostringstream<StringT>,
+                                          internal::fmt_params<StringT>>;
+
+using ostringstream  = basic_ostringstream<std::string>;
+using wostringstream = basic_ostringstream<std::wstring>;
+
+// output methods
+
 template <typename OstreamBaseT, typename FmtParamsT, typename FirstT,
           typename SecondT>
 basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(
     basic_ostream<OstreamBaseT, FmtParamsT>& os,
-    const std::pair<FirstT, SecondT>& p);
+    const std::pair<FirstT, SecondT>&        p);
 
 template <typename OstreamBaseT, typename FmtParamsT>
 basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(
@@ -65,7 +84,7 @@ basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(
   template <typename OstreamBaseT, typename FmtParamsT, typename... Args> \
   basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(                    \
       basic_ostream<OstreamBaseT, FmtParamsT>& os,                        \
-      const std::container<Args...>& c)
+      const std::container<Args...>&           c)
 
 DECLARE_MY_OSTREAM(array);
 DECLARE_MY_OSTREAM(deque);
@@ -274,7 +293,7 @@ template <typename OstreamBaseT, typename FmtParamsT, typename FirstT,
           typename SecondT>
 basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(
     basic_ostream<OstreamBaseT, FmtParamsT>& os,
-    const std::pair<FirstT, SecondT>& p) {
+    const std::pair<FirstT, SecondT>&        p) {
   os << os.fmt.pair_fmt.lb;
   os << p.first;
   os << os.fmt.pair_fmt.sep;
