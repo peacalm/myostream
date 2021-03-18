@@ -45,25 +45,27 @@ template <
     typename OstreamBaseT,
     typename FmtParamsT = internal::fmt_params<std::basic_string<
         typename OstreamBaseT::char_type, typename OstreamBaseT::traits_type>>>
-class ostream;
+class basic_ostream;
 
 template <typename OstreamBaseT, typename FmtParamsT, typename FirstT,
           typename SecondT>
-ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    ostream<OstreamBaseT, FmtParamsT>& os, const std::pair<FirstT, SecondT>& p);
+basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(
+    basic_ostream<OstreamBaseT, FmtParamsT>& os,
+    const std::pair<FirstT, SecondT>& p);
 
 template <typename OstreamBaseT, typename FmtParamsT>
-ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<>& t);
+basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(
+    basic_ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<>& t);
 
 template <typename OstreamBaseT, typename FmtParamsT, typename... Args>
-ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<Args...>& t);
+basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(
+    basic_ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<Args...>& t);
 
 #define DECLARE_MY_OSTREAM(container)                                     \
   template <typename OstreamBaseT, typename FmtParamsT, typename... Args> \
-  ostream<OstreamBaseT, FmtParamsT>& operator<<(                          \
-      ostream<OstreamBaseT, FmtParamsT>& os, const std::container<Args...>& c)
+  basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(                    \
+      basic_ostream<OstreamBaseT, FmtParamsT>& os,                        \
+      const std::container<Args...>& c)
 
 DECLARE_MY_OSTREAM(array);
 DECLARE_MY_OSTREAM(deque);
@@ -222,16 +224,17 @@ struct tuple_printer<OstreamT, TupleT, 1> {
 }  // namespace internal
 
 template <typename OstreamBaseT, typename FmtParamsT>
-class ostream : public OstreamBaseT {
+class basic_ostream : public OstreamBaseT {
   using base_type       = OstreamBaseT;
   using fmt_params_type = FmtParamsT;
 
 public:
   template <typename... Args>
-  explicit ostream(Args&&... args) : base_type(std::forward<Args>(args)...) {}
+  explicit basic_ostream(Args&&... args)
+      : base_type(std::forward<Args>(args)...) {}
 
   template <typename... Args>
-  ostream& print(const Args&... args) {
+  basic_ostream& print(const Args&... args) {
     *this << fmt.print_fmt.lb;
     __print(args...);
     *this << fmt.print_fmt.rb;
@@ -239,7 +242,7 @@ public:
   }
 
   template <typename Iterator>
-  ostream& print_range(Iterator begin, Iterator end) {
+  basic_ostream& print_range(Iterator begin, Iterator end) {
     *this << fmt.print_range_fmt.lb;
     for (auto it = begin; it != end; ++it) {
       if (it != begin) *this << fmt.print_range_fmt.sep;
@@ -253,13 +256,13 @@ public:
 
 private:
   template <typename T>
-  ostream& __print(const T& t) {
+  basic_ostream& __print(const T& t) {
     *this << t;
     return *this;
   }
 
   template <typename T, typename... Args>
-  ostream& __print(const T& t, const Args&... args) {
+  basic_ostream& __print(const T& t, const Args&... args) {
     *this << t;
     *this << fmt.print_fmt.sep;
     __print(args...);
@@ -269,9 +272,9 @@ private:
 
 template <typename OstreamBaseT, typename FmtParamsT, typename FirstT,
           typename SecondT>
-ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    ostream<OstreamBaseT, FmtParamsT>& os,
-    const std::pair<FirstT, SecondT>&  p) {
+basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(
+    basic_ostream<OstreamBaseT, FmtParamsT>& os,
+    const std::pair<FirstT, SecondT>& p) {
   os << os.fmt.pair_fmt.lb;
   os << p.first;
   os << os.fmt.pair_fmt.sep;
@@ -281,18 +284,18 @@ ostream<OstreamBaseT, FmtParamsT>& operator<<(
 }
 
 template <typename OstreamBaseT, typename FmtParamsT>
-ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<>& t) {
+basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(
+    basic_ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<>& t) {
   os << os.fmt.tuple_fmt.lb;
   os << os.fmt.tuple_fmt.rb;
   return os;
 }
 
 template <typename OstreamBaseT, typename FmtParamsT, typename... Args>
-ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<Args...>& t) {
+basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(
+    basic_ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<Args...>& t) {
   os << os.fmt.tuple_fmt.lb;
-  internal::tuple_printer<ostream<OstreamBaseT, FmtParamsT>,
+  internal::tuple_printer<basic_ostream<OstreamBaseT, FmtParamsT>,
                           std::tuple<Args...>, sizeof...(Args)>::print(os, t);
   os << os.fmt.tuple_fmt.rb;
   return os;
@@ -338,7 +341,7 @@ BasicStringT to_basic_string(const T& t) {
       std::basic_ostringstream<typename BasicStringT::value_type,
                                typename BasicStringT::traits_type,
                                typename BasicStringT::allocator_type>;
-  ostream<base_oss_t, FmtParamsT> oss;
+  basic_ostream<base_oss_t, FmtParamsT> oss;
   oss << t;
   return oss.str();
 }
