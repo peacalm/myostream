@@ -7,18 +7,18 @@ their composited types.
 usages:
 ## myostream::basic_ostream<OstreamBaseType, FmtParamsType=fmt_params>
 
-You need to put at least an `OstreamBaseType` into template parameter as a base 
-class, e.g. `myostream::basic_ostream<std::ostringstream>`, which indicates 
-where the output writes to. 
+You need to put at least an `OstreamBaseType` into the first template parameter 
+as a base class, e.g. `myostream::basic_ostream<std::ostringstream>`, which 
+indicates where the output writes to. 
 And you can put an optional second template parameter `FmtParamsType` 
 to specify your preferred left-border, right-border and separator for each 
 container type, or just use the default value.
 
 What's more, there are useful pre-defined ostream types with default format:
-* ostream  = basic_ostream<std::ostream>
-* wostream = basic_ostream<std::wostream>
-* ostringstream  = basic_ostream<std::ostringstream>
-* wostringstream = basic_ostream<std::wostringstream>
+* ostream  = basic_ostream\<std::ostream>
+* wostream = basic_ostream\<std::wostream>
+* ostringstream  = basic_ostream\<std::ostringstream>
+* wostringstream = basic_ostream\<std::wostringstream>
 
 example:
 ```c++
