@@ -49,8 +49,10 @@ template <
         typename OstreamBaseT::char_type, typename OstreamBaseT::traits_type>>>
 class basic_ostream;
 
-using ostream  = basic_ostream<std::ostream>;
-using wostream = basic_ostream<std::wostream>;
+using ostream        = basic_ostream<std::ostream>;
+using wostream       = basic_ostream<std::wostream>;
+using ostringstream  = basic_ostream<std::ostringstream>;
+using wostringstream = basic_ostream<std::wostringstream>;
 
 template <typename StringT>
 using std_basic_ostringstream =
@@ -62,8 +64,12 @@ template <typename StringT>
 using basic_ostringstream = basic_ostream<std_basic_ostringstream<StringT>,
                                           internal::fmt_params<StringT>>;
 
-using ostringstream  = basic_ostringstream<std::string>;
-using wostringstream = basic_ostringstream<std::wstring>;
+static_assert(
+    std::is_same<ostringstream, basic_ostringstream<std::string>>::value,
+    "never happen");
+static_assert(
+    std::is_same<wostringstream, basic_ostringstream<std::wstring>>::value,
+    "never happen");
 
 // output methods
 
