@@ -107,9 +107,35 @@ struct fmt_param_unit {
   using string_type = StringT;
   using char_type   = typename string_type::value_type;
 
+  fmt_param_unit() {}
+
   fmt_param_unit(const string_type& left_border, const string_type& separator,
                  const string_type& right_border)
       : lb(left_border), sep(separator), rb(right_border) {}
+
+  fmt_param_unit(string_type&& left_border, string_type&& separator,
+                 string_type&& right_border)
+      : lb(std::move(left_border)),
+        sep(std::move(separator)),
+        rb(std::move(right_border)) {}
+
+  template <typename T>
+  fmt_param_unit& with_lb(T&& s) {
+    lb = std::forward<T>(s);
+    return *this;
+  }
+
+  template <typename T>
+  fmt_param_unit& with_sep(T&& s) {
+    sep = std::forward<T>(s);
+    return *this;
+  }
+
+  template <typename T>
+  fmt_param_unit& with_rb(T&& s) {
+    rb = std::forward<T>(s);
+    return *this;
+  }
 
   string_type lb, sep, rb;
 };
