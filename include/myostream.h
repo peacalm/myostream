@@ -147,7 +147,7 @@ struct fmt_params {
   using fmt_param_unit_type = fmt_param_unit<string_type>;
 
   // clang-format off
-  fmt_param_unit<string_type>
+  fmt_param_unit_type
                    pair_fmt{{'('}, {',', ' '}, {')'}},
                   tuple_fmt{{'<'}, {',', ' '}, {'>'}},
 
@@ -170,7 +170,10 @@ struct fmt_params {
           unordered_map_fmt{{'{'}, {',', ' '}, {'}'}},
        unordered_map_kv_fmt{{   }, {':', ' '}, {   }},
      unordered_multimap_fmt{{'{'}, {',', ' '}, {'}'}},
-  unordered_multimap_kv_fmt{{   }, {':', ' '}, {   }};
+  unordered_multimap_kv_fmt{{   }, {':', ' '}, {   }},
+
+                  print_fmt{{   }, {',', ' '}, {   }},
+            print_range_fmt{{   }, {',', ' '}, {   }};
   // clang-format on
 };
 
@@ -227,7 +230,41 @@ public:
   template <typename... Args>
   explicit ostream(Args&&... args) : base_type(std::forward<Args>(args)...) {}
 
+  template <typename... Args>
+  ostream& print(const Args&... args) {
+    *this << fmt.print_fmt.lb;
+    __print(args...);
+    *this << fmt.print_fmt.rb;
+    return *this;
+  }
+
+  template <typename Iterator>
+  ostream& print_range(Iterator begin, Iterator end) {
+    *this << fmt.print_range_fmt.lb;
+    for (auto it = begin; it != end; ++it) {
+      if (it != begin) *this << fmt.print_range_fmt.sep;
+      *this << *it;
+    }
+    *this << fmt.print_range_fmt.rb;
+    return *this;
+  }
+
   fmt_params_type fmt;
+
+private:
+  template <typename T>
+  ostream& __print(const T& t) {
+    *this << t;
+    return *this;
+  }
+
+  template <typename T, typename... Args>
+  ostream& __print(const T& t, const Args&... args) {
+    *this << t;
+    *this << fmt.print_fmt.sep;
+    __print(args...);
+    return *this;
+  }
 };
 
 template <typename OstreamBaseT, typename FmtParamsT, typename FirstT,
