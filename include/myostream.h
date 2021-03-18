@@ -151,6 +151,14 @@ struct fmt_param_unit {
     return *this;
   }
 
+  template <typename T>
+  fmt_param_unit& with(T&& left_border, T&& separator, T&& right_border) {
+    lb  = std::forward<T>(left_border);
+    sep = std::forward<T>(separator);
+    rb  = std::forward<T>(right_border);
+    return *this;
+  }
+
   string_type lb, sep, rb;
 };
 
