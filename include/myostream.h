@@ -251,8 +251,9 @@ struct tuple_printer<OstreamT, TupleT, 1> {
 
 template <typename OstreamBaseT, typename FmtParamsT>
 class basic_ostream : public OstreamBaseT {
-  using base_type       = OstreamBaseT;
-  using fmt_params_type = FmtParamsT;
+  using base_type           = OstreamBaseT;
+  using fmt_params_type     = FmtParamsT;
+  using fmt_param_unit_type = typename fmt_params_type::fmt_param_unit_type;
 
 public:
   template <typename... Args>
@@ -269,12 +270,28 @@ public:
 
   template <typename Iterator>
   basic_ostream& print_range(Iterator begin, Iterator end) {
-    *this << fmt.print_range_fmt.lb;
+    return print_range(begin, end, fmt.print_range_fmt);
+  }
+
+  template <typename Iterator>
+  basic_ostream& print_range(Iterator begin, Iterator end,
+                             const fmt_param_unit_type& range_fmt) {
+    *this << range_fmt.lb;
     for (auto it = begin; it != end; ++it) {
-      if (it != begin) *this << fmt.print_range_fmt.sep;
+      if (it != begin) *this << range_fmt.sep;
       *this << *it;
     }
-    *this << fmt.print_range_fmt.rb;
+    *this << range_fmt.rb;
+    return *this;
+  }
+
+  basic_ostream& with_fmt(const fmt_params_type& f) {
+    fmt = f;
+    return *this;
+  }
+
+  basic_ostream& with_fmt(fmt_params_type&& f) {
+    fmt = std::move(f);
     return *this;
   }
 
