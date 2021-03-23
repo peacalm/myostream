@@ -268,6 +268,12 @@ public:
     return *this;
   }
 
+  template <typename... Args>
+  basic_ostream& println(const Args&... args) {
+    print(args...) << std::endl;
+    return *this;
+  }
+
   template <typename Iterator>
   basic_ostream& print_range(Iterator begin, Iterator end) {
     return print_range(begin, end, fmt.print_range_fmt);
