@@ -260,6 +260,8 @@ public:
   explicit basic_ostream(Args&&... args)
       : base_type(std::forward<Args>(args)...) {}
 
+  basic_ostream& print() { return *this; }
+
   template <typename... Args>
   basic_ostream& print(const Args&... args) {
     *this << fmt.print_fmt.lb;
