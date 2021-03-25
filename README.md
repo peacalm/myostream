@@ -12,10 +12,10 @@ as a base class, e.g. `myostream::basic_ostream<std::ostringstream>`, which
 indicates where the output writes to. 
 And you can put an optional second template parameter `PreferencesT` 
 to specify your preferred left-border, right-border and separator for each 
-container type, or just use the default_preferences.
+container type, or just use the default preferences.
 
 What's more, there are useful pre-defined ostream types with 
-default_preferences:
+default preferences:
 * ostream  = basic_ostream\<std::ostream>
 * wostream = basic_ostream\<std::wostream>
 * ostringstream  = basic_ostream\<std::ostringstream>
