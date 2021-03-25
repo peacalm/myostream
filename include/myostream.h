@@ -25,6 +25,7 @@
 #include <set>
 #include <sstream>
 #include <tuple>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -298,6 +299,9 @@ public:
   using string_type      = typename preferences_type::string_type;
   using char_type        = typename preferences_type::char_type;
   using format_type      = typename preferences_type::format_type;
+  static_assert(
+      std::is_same<typename base_type::char_type, char_type>::value,
+      "OstreamBaseT::char_type must be same type as PreferencesT::char_type");
 
   template <typename... Args>
   explicit basic_ostream(Args&&... args)
