@@ -4,7 +4,7 @@ their composited types.
 
 * C++ standard requirement: >= C++11
 
-supported container or container-like types
+supported container or container-like types:
 * std::pair
 * std::tuple
 
@@ -109,6 +109,7 @@ std::cout << myostream::tostr("show \"tostr\"", vi) << std::endl;
 
 ### function: myostream::towstr(const Args&... args)
 all same as `myostream::tostr` except result into std::wstring type.
+
 
 ## Install
 Install the lib to your computer:  
