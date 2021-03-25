@@ -295,6 +295,8 @@ class basic_ostream : public OstreamBaseT {
 public:
   using base_type        = OstreamBaseT;
   using preferences_type = PreferencesT;
+  using string_type      = typename preferences_type::string_type;
+  using char_type        = typename preferences_type::char_type;
   using format_type      = typename preferences_type::format_type;
 
   template <typename... Args>
