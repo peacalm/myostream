@@ -292,11 +292,11 @@ struct tuple_printer<OstreamT, TupleT, 1> {
 
 template <typename OstreamBaseT, typename PreferencesT>
 class basic_ostream : public OstreamBaseT {
+public:
   using base_type        = OstreamBaseT;
   using preferences_type = PreferencesT;
   using format_type      = typename preferences_type::format_type;
 
-public:
   template <typename... Args>
   explicit basic_ostream(Args&&... args)
       : base_type(std::forward<Args>(args)...) {}
