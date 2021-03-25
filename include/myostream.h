@@ -293,14 +293,16 @@ struct tuple_printer<OstreamT, TupleT, 1> {
 
 template <typename OstreamBaseT, typename PreferencesT>
 class basic_ostream : public OstreamBaseT {
+  using base_type = OstreamBaseT;
+
 public:
-  using base_type        = OstreamBaseT;
-  using preferences_type = PreferencesT;
-  using string_type      = typename preferences_type::string_type;
-  using char_type        = typename preferences_type::char_type;
-  using format_type      = typename preferences_type::format_type;
+  using ostream_base_type = OstreamBaseT;
+  using preferences_type  = PreferencesT;
+  using string_type       = typename preferences_type::string_type;
+  using char_type         = typename preferences_type::char_type;
+  using format_type       = typename preferences_type::format_type;
   static_assert(
-      std::is_same<typename base_type::char_type, char_type>::value,
+      std::is_same<typename OstreamBaseT::char_type, char_type>::value,
       "OstreamBaseT::char_type must be same type as PreferencesT::char_type");
 
   template <typename... Args>
