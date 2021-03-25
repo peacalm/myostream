@@ -5,7 +5,7 @@ their composited types.
 * C++ standard requirement: >= C++11
 
 usages:
-## myostream::basic_ostream<OstreamBaseT, PreferencesT=default_preferences>
+## class: myostream::basic_ostream<OstreamBaseT, PreferencesT=default_preferences>
 
 You need to put at least an `OstreamBaseT` into the first template parameter 
 as a base class, e.g. `myostream::basic_ostream<std::ostringstream>`, which 
@@ -39,7 +39,7 @@ std::cout << myoss.str() << std::endl;  // [{1, 2, 3}, {100, 200}]
 
 ```
 
-## myostream::tostr(const Args&... args)
+## function: myostream::tostr(const Args&... args)
 one line code to convert multiple arguments into std::string, seperated by ", ".
 
 example:
@@ -49,5 +49,27 @@ std::cout << myostream::tostr("show \"tostr\"", vi) << std::endl;
 // show "tostr", [1, 2, 3]
 ```
 
-## myostream::towstr(const Args&... args)
+## function: myostream::towstr(const Args&... args)
 all same as `myostream::tostr` except result into std::wstring type.
+
+
+## supported container or container-like types
+* std::pair
+* std::tuple
+
+* std::array
+* std::deque
+* std::forward_list
+* std::initializer_list
+* std::list
+* std::vector
+
+* std::set
+* std::multiset
+* std::unordered_set
+* std::unordered_multiset
+
+* std::map
+* std::multimap
+* std::unordered_map
+* std::unordered_multimap
