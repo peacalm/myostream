@@ -4,7 +4,7 @@ their composited types.
 
 * C++ standard requirement: >= C++11
 
-supported container or container-like types:
+Supported container or container-like types:
 * std::pair
 * std::tuple
 
