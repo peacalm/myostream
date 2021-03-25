@@ -76,7 +76,7 @@ basic_ostream& print_range(Iterator begin, Iterator end,
                            const format_type& range_fmt);
 ```
 
-example:
+Example:
 ```c++
 // output to stdout
 myostream::ostream mycout(std::cout.rdbuf());
@@ -98,9 +98,9 @@ mycout.print("hello ").println("world", 123, vi);
 ```
 
 ### function: myostream::tostr(const Args&... args)
-one line code to convert multiple arguments into std::string, seperated by ", ".
+One line code to convert multiple arguments into std::string, seperated by ", ".
 
-example:
+Example:
 ```c++
 std::vector<int> vi{1, 2, 3};
 std::cout << myostream::tostr("show \"tostr\"", vi) << std::endl;
@@ -108,7 +108,8 @@ std::cout << myostream::tostr("show \"tostr\"", vi) << std::endl;
 ```
 
 ### function: myostream::towstr(const Args&... args)
-all same as `myostream::tostr` except result into std::wstring type.
+All same as `myostream::tostr` except result into std::wstring and seperated 
+by L", ".
 
 
 ## Install
