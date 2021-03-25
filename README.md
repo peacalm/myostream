@@ -4,6 +4,28 @@ their composited types.
 
 * C++ standard requirement: >= C++11
 
+supported container or container-like types
+* std::pair
+* std::tuple
+
+* std::array
+* std::deque
+* std::forward_list
+* std::initializer_list
+* std::list
+* std::vector
+
+* std::set
+* std::multiset
+* std::unordered_set
+* std::unordered_multiset
+
+* std::map
+* std::multimap
+* std::unordered_map
+* std::unordered_multimap
+
+
 ## Usage
 ### class: myostream::basic_ostream<OstreamBaseT, PreferencesT=default_preferences>
 
@@ -87,27 +109,6 @@ std::cout << myostream::tostr("show \"tostr\"", vi) << std::endl;
 
 ### function: myostream::towstr(const Args&... args)
 all same as `myostream::tostr` except result into std::wstring type.
-
-### supported container or container-like types
-* std::pair
-* std::tuple
-
-* std::array
-* std::deque
-* std::forward_list
-* std::initializer_list
-* std::list
-* std::vector
-
-* std::set
-* std::multiset
-* std::unordered_set
-* std::unordered_multiset
-
-* std::map
-* std::multimap
-* std::unordered_map
-* std::unordered_multimap
 
 ## Install
 Install the lib to your computer:  
