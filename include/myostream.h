@@ -170,50 +170,6 @@ struct ternary_format {
   string_type lb, sep, rb;
 };
 
-template <typename OstreamT, typename IteratorT, typename FormatT>
-OstreamT& output_all(OstreamT& os, IteratorT b, IteratorT e, const FormatT& f) {
-  os << f.lb;
-  for (IteratorT it = b; it != e; ++it) {
-    if (it != b) os << f.sep;
-    os << *it;
-  }
-  os << f.rb;
-  return os;
-}
-
-template <typename OstreamT, typename IteratorT, typename FormatT>
-OstreamT& output_all(OstreamT&      os,
-                     IteratorT      b,
-                     IteratorT      e,
-                     const FormatT& f,
-                     const FormatT& kv_f) {
-  os << f.lb;
-  for (IteratorT it = b; it != e; ++it) {
-    if (it != b) os << f.sep;
-    os << kv_f.lb;
-    os << it->first;
-    os << kv_f.sep;
-    os << it->second;
-    os << kv_f.rb;
-  }
-  os << f.rb;
-  return os;
-}
-
-template <typename OstreamT, typename TupleT, size_t N>
-struct tuple_printer {
-  static void print(OstreamT& os, const TupleT& t) {
-    tuple_printer<OstreamT, TupleT, N - 1>::print(os, t);
-    os << os.pref.tuple_fmt.sep;
-    os << std::get<N - 1>(t);
-  }
-};
-
-template <typename OstreamT, typename TupleT>
-struct tuple_printer<OstreamT, TupleT, 1> {
-  static void print(OstreamT& os, const TupleT& t) { os << std::get<0>(t); }
-};
-
 }  // namespace internal
 
 template <typename StringT>
@@ -285,6 +241,54 @@ struct default_preferences {
       print_range_fmt;
   // clang-format on
 };
+
+namespace internal {
+
+template <typename OstreamT, typename IteratorT, typename FormatT>
+OstreamT& output_all(OstreamT& os, IteratorT b, IteratorT e, const FormatT& f) {
+  os << f.lb;
+  for (IteratorT it = b; it != e; ++it) {
+    if (it != b) os << f.sep;
+    os << *it;
+  }
+  os << f.rb;
+  return os;
+}
+
+template <typename OstreamT, typename IteratorT, typename FormatT>
+OstreamT& output_all(OstreamT&      os,
+                     IteratorT      b,
+                     IteratorT      e,
+                     const FormatT& f,
+                     const FormatT& kv_f) {
+  os << f.lb;
+  for (IteratorT it = b; it != e; ++it) {
+    if (it != b) os << f.sep;
+    os << kv_f.lb;
+    os << it->first;
+    os << kv_f.sep;
+    os << it->second;
+    os << kv_f.rb;
+  }
+  os << f.rb;
+  return os;
+}
+
+template <typename OstreamT, typename TupleT, size_t N>
+struct tuple_printer {
+  static void print(OstreamT& os, const TupleT& t) {
+    tuple_printer<OstreamT, TupleT, N - 1>::print(os, t);
+    os << os.pref.tuple_fmt.sep;
+    os << std::get<N - 1>(t);
+  }
+};
+
+template <typename OstreamT, typename TupleT>
+struct tuple_printer<OstreamT, TupleT, 1> {
+  static void print(OstreamT& os, const TupleT& t) { os << std::get<0>(t); }
+};
+
+}  // namespace internal
 
 template <typename OstreamBaseT, typename PreferencesT>
 class basic_ostream : public OstreamBaseT {
