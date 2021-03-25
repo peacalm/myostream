@@ -121,5 +121,5 @@ cd build
 cmake ..
 make install
 ```
-Then happy coding with `#include <myostream>`.
+Then happy coding with `#include <myostream.h>`.
 
