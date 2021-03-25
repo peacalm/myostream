@@ -14,3 +14,6 @@ AllowShortFunctionsOnASingleLine:    All
 AllowShortIfStatementsOnASingleLine: WithoutElse
 AllowShortLambdasOnASingleLine:      All
 AllowShortLoopsOnASingleLine:        true
+
+BinPackArguments: false
+BinPackParameters: false

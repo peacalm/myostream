@@ -5,16 +5,17 @@ their composited types.
 * C++ standard requirement: >= C++11
 
 usages:
-## myostream::basic_ostream<OstreamBaseType, FmtParamsType=fmt_params>
+## myostream::basic_ostream<OstreamBaseT, PreferencesT=default_preferences>
 
-You need to put at least an `OstreamBaseType` into the first template parameter 
+You need to put at least an `OstreamBaseT` into the first template parameter 
 as a base class, e.g. `myostream::basic_ostream<std::ostringstream>`, which 
 indicates where the output writes to. 
-And you can put an optional second template parameter `FmtParamsType` 
+And you can put an optional second template parameter `PreferencesT` 
 to specify your preferred left-border, right-border and separator for each 
-container type, or just use the default value.
+container type, or just use the default_preferences.
 
-What's more, there are useful pre-defined ostream types with default format:
+What's more, there are useful pre-defined ostream types with 
+default_preferences:
 * ostream  = basic_ostream\<std::ostream>
 * wostream = basic_ostream\<std::wostream>
 * ostringstream  = basic_ostream\<std::ostringstream>

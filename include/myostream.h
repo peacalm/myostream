@@ -36,17 +36,13 @@ namespace myostream {
 
 // types
 
-namespace internal {
-
 template <typename StringT>
-struct fmt_params;
+struct default_preferences;
 
-}  // namespace internal
-
-template <
-    typename OstreamBaseT,
-    typename FmtParamsT = internal::fmt_params<std::basic_string<
-        typename OstreamBaseT::char_type, typename OstreamBaseT::traits_type>>>
+template <typename OstreamBaseT,
+          typename PreferencesT = default_preferences<
+              std::basic_string<typename OstreamBaseT::char_type,
+                                typename OstreamBaseT::traits_type>>>
 class basic_ostream;
 
 using ostream        = basic_ostream<std::ostream>;
@@ -62,7 +58,7 @@ using std_basic_ostringstream =
 
 template <typename StringT>
 using basic_ostringstream = basic_ostream<std_basic_ostringstream<StringT>,
-                                          internal::fmt_params<StringT>>;
+                                          default_preferences<StringT>>;
 
 static_assert(
     std::is_same<ostringstream, basic_ostringstream<std::string>>::value,
@@ -73,25 +69,28 @@ static_assert(
 
 // output methods
 
-template <typename OstreamBaseT, typename FmtParamsT, typename FirstT,
+template <typename OstreamBaseT,
+          typename PreferencesT,
+          typename FirstT,
           typename SecondT>
-basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    basic_ostream<OstreamBaseT, FmtParamsT>& os,
-    const std::pair<FirstT, SecondT>&        p);
+basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
+    basic_ostream<OstreamBaseT, PreferencesT>& os,
+    const std::pair<FirstT, SecondT>&          p);
 
-template <typename OstreamBaseT, typename FmtParamsT>
-basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    basic_ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<>& t);
+template <typename OstreamBaseT, typename PreferencesT>
+basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
+    basic_ostream<OstreamBaseT, PreferencesT>& os, const std::tuple<>& t);
 
-template <typename OstreamBaseT, typename FmtParamsT, typename... Args>
-basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    basic_ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<Args...>& t);
+template <typename OstreamBaseT, typename PreferencesT, typename... Args>
+basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
+    basic_ostream<OstreamBaseT, PreferencesT>& os,
+    const std::tuple<Args...>&                 t);
 
-#define DECLARE_MY_OSTREAM(container)                                     \
-  template <typename OstreamBaseT, typename FmtParamsT, typename... Args> \
-  basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(                    \
-      basic_ostream<OstreamBaseT, FmtParamsT>& os,                        \
-      const std::container<Args...>&           c)
+#define DECLARE_MY_OSTREAM(container)                                       \
+  template <typename OstreamBaseT, typename PreferencesT, typename... Args> \
+  basic_ostream<OstreamBaseT, PreferencesT>& operator<<(                    \
+      basic_ostream<OstreamBaseT, PreferencesT>& os,                        \
+      const std::container<Args...>&             c)
 
 DECLARE_MY_OSTREAM(array);
 DECLARE_MY_OSTREAM(deque);
@@ -123,91 +122,56 @@ std::wstring towstr(const Args&... args);
 namespace internal {
 
 template <typename StringT>
-struct fmt_param_unit {
+struct ternary_format {
   using string_type = StringT;
   using char_type   = typename string_type::value_type;
 
-  fmt_param_unit() {}
+  ternary_format() {}
 
-  fmt_param_unit(const string_type& left_border, const string_type& separator,
+  ternary_format(const string_type& left_border,
+                 const string_type& separator,
                  const string_type& right_border)
       : lb(left_border), sep(separator), rb(right_border) {}
 
-  fmt_param_unit(string_type&& left_border, string_type&& separator,
+  ternary_format(string_type&& left_border,
+                 string_type&& separator,
                  string_type&& right_border)
       : lb(std::move(left_border)),
         sep(std::move(separator)),
         rb(std::move(right_border)) {}
 
-  template <typename T>
-  fmt_param_unit& with_lb(T&& s) {
-    lb = std::forward<T>(s);
+  // clang-format off
+  ternary_format& with_lb (const string_type& s) {lb  = s; return *this;}
+  ternary_format& with_sep(const string_type& s) {sep = s; return *this;}
+  ternary_format& with_rb (const string_type& s) {rb  = s; return *this;}
+  ternary_format& with_lb (string_type&& s) {lb  = std::move(s); return *this;}
+  ternary_format& with_sep(string_type&& s) {sep = std::move(s); return *this;}
+  ternary_format& with_rb (string_type&& s) {rb  = std::move(s); return *this;}
+  // clang-format on
+
+  ternary_format& with(const string_type& left_border,
+                       const string_type& separator,
+                       const string_type& right_border) {
+    lb  = left_border;
+    sep = separator;
+    rb  = right_border;
     return *this;
   }
 
-  template <typename T>
-  fmt_param_unit& with_sep(T&& s) {
-    sep = std::forward<T>(s);
-    return *this;
-  }
-
-  template <typename T>
-  fmt_param_unit& with_rb(T&& s) {
-    rb = std::forward<T>(s);
-    return *this;
-  }
-
-  template <typename T>
-  fmt_param_unit& with(T&& left_border, T&& separator, T&& right_border) {
-    lb  = std::forward<T>(left_border);
-    sep = std::forward<T>(separator);
-    rb  = std::forward<T>(right_border);
+  ternary_format& with(string_type&& left_border,
+                       string_type&& separator,
+                       string_type&& right_border) {
+    lb  = std::move(left_border);
+    sep = std::move(separator);
+    rb  = std::move(right_border);
     return *this;
   }
 
   string_type lb, sep, rb;
 };
 
-template <typename StringT>
-struct fmt_params {
-  using string_type         = StringT;
-  using char_type           = typename string_type::value_type;
-  using fmt_param_unit_type = fmt_param_unit<string_type>;
-
-  // clang-format off
-  fmt_param_unit_type
-                   pair_fmt{{'('}, {',', ' '}, {')'}},
-                  tuple_fmt{{'<'}, {',', ' '}, {'>'}},
-
-                  array_fmt{{'['}, {',', ' '}, {']'}},
-                  deque_fmt{{'['}, {',', ' '}, {']'}},
-           forward_list_fmt{{'['}, {',', ' '}, {']'}},
-       initializer_list_fmt{{'['}, {',', ' '}, {']'}},
-                   list_fmt{{'['}, {',', ' '}, {']'}},
-                 vector_fmt{{'['}, {',', ' '}, {']'}},
-
-                    set_fmt{{'{'}, {',', ' '}, {'}'}},
-               multiset_fmt{{'{'}, {',', ' '}, {'}'}},
-          unordered_set_fmt{{'{'}, {',', ' '}, {'}'}},
-     unordered_multiset_fmt{{'{'}, {',', ' '}, {'}'}},
-
-                    map_fmt{{'{'}, {',', ' '}, {'}'}},
-                 map_kv_fmt{{   }, {':', ' '}, {   }},
-               multimap_fmt{{'{'}, {',', ' '}, {'}'}},
-            multimap_kv_fmt{{   }, {':', ' '}, {   }},
-          unordered_map_fmt{{'{'}, {',', ' '}, {'}'}},
-       unordered_map_kv_fmt{{   }, {':', ' '}, {   }},
-     unordered_multimap_fmt{{'{'}, {',', ' '}, {'}'}},
-  unordered_multimap_kv_fmt{{   }, {':', ' '}, {   }},
-
-                  print_fmt{{   }, {',', ' '}, {   }},
-            print_range_fmt{{   }, {',', ' '}, {   }};
-  // clang-format on
-};
-
-template <typename OstreamT, typename IteratorT, typename FmtParamUnitT>
-OstreamT& output_all(OstreamT& os, IteratorT b, IteratorT e,
-                     const FmtParamUnitT& f) {
+template <typename OstreamT, typename IteratorT, typename FormatT>
+OstreamT& output_all(OstreamT& os, IteratorT b, IteratorT e, const FormatT& f) {
   os << f.lb;
   for (IteratorT it = b; it != e; ++it) {
     if (it != b) os << f.sep;
@@ -217,9 +181,12 @@ OstreamT& output_all(OstreamT& os, IteratorT b, IteratorT e,
   return os;
 }
 
-template <typename OstreamT, typename IteratorT, typename FmtParamUnitT>
-OstreamT& output_all(OstreamT& os, IteratorT b, IteratorT e,
-                     const FmtParamUnitT& f, const FmtParamUnitT& kv_f) {
+template <typename OstreamT, typename IteratorT, typename FormatT>
+OstreamT& output_all(OstreamT&      os,
+                     IteratorT      b,
+                     IteratorT      e,
+                     const FormatT& f,
+                     const FormatT& kv_f) {
   os << f.lb;
   for (IteratorT it = b; it != e; ++it) {
     if (it != b) os << f.sep;
@@ -237,7 +204,7 @@ template <typename OstreamT, typename TupleT, size_t N>
 struct tuple_printer {
   static void print(OstreamT& os, const TupleT& t) {
     tuple_printer<OstreamT, TupleT, N - 1>::print(os, t);
-    os << os.fmt.tuple_fmt.sep;
+    os << os.pref.tuple_fmt.sep;
     os << std::get<N - 1>(t);
   }
 };
@@ -249,11 +216,81 @@ struct tuple_printer<OstreamT, TupleT, 1> {
 
 }  // namespace internal
 
-template <typename OstreamBaseT, typename FmtParamsT>
+template <typename StringT>
+struct default_preferences {
+  using string_type = StringT;
+  using char_type   = typename string_type::value_type;
+  using format_type = internal::ternary_format<string_type>;
+
+  default_preferences() { reset(); }
+
+  void reset() {
+    // clang-format off
+                     pair_fmt.with({'('}, {',', ' '}, {')'});
+                    tuple_fmt.with({'<'}, {',', ' '}, {'>'});
+
+                    array_fmt.with({'['}, {',', ' '}, {']'});
+                    deque_fmt.with({'['}, {',', ' '}, {']'});
+             forward_list_fmt.with({'['}, {',', ' '}, {']'});
+         initializer_list_fmt.with({'['}, {',', ' '}, {']'});
+                     list_fmt.with({'['}, {',', ' '}, {']'});
+                   vector_fmt.with({'['}, {',', ' '}, {']'});
+
+                      set_fmt.with({'{'}, {',', ' '}, {'}'});
+                 multiset_fmt.with({'{'}, {',', ' '}, {'}'});
+            unordered_set_fmt.with({'{'}, {',', ' '}, {'}'});
+       unordered_multiset_fmt.with({'{'}, {',', ' '}, {'}'});
+
+                      map_fmt.with({'{'}, {',', ' '}, {'}'});
+                   map_kv_fmt.with({   }, {':', ' '}, {   });
+                 multimap_fmt.with({'{'}, {',', ' '}, {'}'});
+              multimap_kv_fmt.with({   }, {':', ' '}, {   });
+            unordered_map_fmt.with({'{'}, {',', ' '}, {'}'});
+         unordered_map_kv_fmt.with({   }, {':', ' '}, {   });
+       unordered_multimap_fmt.with({'{'}, {',', ' '}, {'}'});
+    unordered_multimap_kv_fmt.with({   }, {':', ' '}, {   });
+
+                    print_fmt.with({   }, {',', ' '}, {   });
+              print_range_fmt.with({   }, {',', ' '}, {   });
+    // clang-format on
+  }
+
+  // clang-format off
+  format_type
+      pair_fmt,
+      tuple_fmt,
+
+      array_fmt,
+      deque_fmt,
+      forward_list_fmt,
+      initializer_list_fmt,
+      list_fmt,
+      vector_fmt,
+
+      set_fmt,
+      multiset_fmt,
+      unordered_set_fmt,
+      unordered_multiset_fmt,
+
+      map_fmt,
+      map_kv_fmt,
+      multimap_fmt,
+      multimap_kv_fmt,
+      unordered_map_fmt,
+      unordered_map_kv_fmt,
+      unordered_multimap_fmt,
+      unordered_multimap_kv_fmt,
+
+      print_fmt,
+      print_range_fmt;
+  // clang-format on
+};
+
+template <typename OstreamBaseT, typename PreferencesT>
 class basic_ostream : public OstreamBaseT {
-  using base_type           = OstreamBaseT;
-  using fmt_params_type     = FmtParamsT;
-  using fmt_param_unit_type = typename fmt_params_type::fmt_param_unit_type;
+  using base_type        = OstreamBaseT;
+  using preferences_type = PreferencesT;
+  using format_type      = typename preferences_type::format_type;
 
 public:
   template <typename... Args>
@@ -262,9 +299,9 @@ public:
 
   template <typename... Args>
   basic_ostream& print(const Args&... args) {
-    *this << fmt.print_fmt.lb;
+    *this << pref.print_fmt.lb;
     __print(args...);
-    *this << fmt.print_fmt.rb;
+    *this << pref.print_fmt.rb;
     return *this;
   }
 
@@ -276,12 +313,13 @@ public:
 
   template <typename Iterator>
   basic_ostream& print_range(Iterator begin, Iterator end) {
-    return print_range(begin, end, fmt.print_range_fmt);
+    return print_range(begin, end, pref.print_range_fmt);
   }
 
   template <typename Iterator>
-  basic_ostream& print_range(Iterator begin, Iterator end,
-                             const fmt_param_unit_type& range_fmt) {
+  basic_ostream& print_range(Iterator           begin,
+                             Iterator           end,
+                             const format_type& range_fmt) {
     *this << range_fmt.lb;
     for (auto it = begin; it != end; ++it) {
       if (it != begin) *this << range_fmt.sep;
@@ -291,17 +329,17 @@ public:
     return *this;
   }
 
-  basic_ostream& with_fmt(const fmt_params_type& f) {
-    fmt = f;
+  basic_ostream& with_pref(const preferences_type& p) {
+    pref = p;
     return *this;
   }
 
-  basic_ostream& with_fmt(fmt_params_type&& f) {
-    fmt = std::move(f);
+  basic_ostream& with_pref(preferences_type&& p) {
+    pref = std::move(p);
     return *this;
   }
 
-  fmt_params_type fmt;
+  preferences_type pref;
 
 private:
   basic_ostream& __print() { return *this; }
@@ -315,54 +353,60 @@ private:
   template <typename T, typename... Args>
   basic_ostream& __print(const T& t, const Args&... args) {
     *this << t;
-    *this << fmt.print_fmt.sep;
+    *this << pref.print_fmt.sep;
     __print(args...);
     return *this;
   }
 };
 
-template <typename OstreamBaseT, typename FmtParamsT, typename FirstT,
+template <typename OstreamBaseT,
+          typename PreferencesT,
+          typename FirstT,
           typename SecondT>
-basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    basic_ostream<OstreamBaseT, FmtParamsT>& os,
-    const std::pair<FirstT, SecondT>&        p) {
-  os << os.fmt.pair_fmt.lb;
+basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
+    basic_ostream<OstreamBaseT, PreferencesT>& os,
+    const std::pair<FirstT, SecondT>&          p) {
+  os << os.pref.pair_fmt.lb;
   os << p.first;
-  os << os.fmt.pair_fmt.sep;
+  os << os.pref.pair_fmt.sep;
   os << p.second;
-  os << os.fmt.pair_fmt.rb;
+  os << os.pref.pair_fmt.rb;
   return os;
 }
 
-template <typename OstreamBaseT, typename FmtParamsT>
-basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    basic_ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<>& t) {
-  os << os.fmt.tuple_fmt.lb;
-  os << os.fmt.tuple_fmt.rb;
+template <typename OstreamBaseT, typename PreferencesT>
+basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
+    basic_ostream<OstreamBaseT, PreferencesT>& os, const std::tuple<>& t) {
+  os << os.pref.tuple_fmt.lb;
+  os << os.pref.tuple_fmt.rb;
   return os;
 }
 
-template <typename OstreamBaseT, typename FmtParamsT, typename... Args>
-basic_ostream<OstreamBaseT, FmtParamsT>& operator<<(
-    basic_ostream<OstreamBaseT, FmtParamsT>& os, const std::tuple<Args...>& t) {
-  os << os.fmt.tuple_fmt.lb;
-  internal::tuple_printer<basic_ostream<OstreamBaseT, FmtParamsT>,
-                          std::tuple<Args...>, sizeof...(Args)>::print(os, t);
-  os << os.fmt.tuple_fmt.rb;
+template <typename OstreamBaseT, typename PreferencesT, typename... Args>
+basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
+    basic_ostream<OstreamBaseT, PreferencesT>& os,
+    const std::tuple<Args...>&                 t) {
+  os << os.pref.tuple_fmt.lb;
+  internal::tuple_printer<basic_ostream<OstreamBaseT, PreferencesT>,
+                          std::tuple<Args...>,
+                          sizeof...(Args)>::print(os, t);
+  os << os.pref.tuple_fmt.rb;
   return os;
 }
 
-#define DEFINE_MY_OSTREAM(container)                      \
-  DECLARE_MY_OSTREAM(container) {                         \
-    return internal::output_all(os, c.cbegin(), c.cend(), \
-                                os.fmt.container##_fmt);  \
+#define DEFINE_MY_OSTREAM(container)                        \
+  DECLARE_MY_OSTREAM(container) {                           \
+    return internal::output_all(                            \
+        os, c.cbegin(), c.cend(), os.pref.container##_fmt); \
   }
 
-#define DEFINE_MY_OSTREAM_FOR_MAP(container)                \
-  DECLARE_MY_OSTREAM(container) {                           \
-    return internal::output_all(os, c.cbegin(), c.cend(),   \
-                                os.fmt.container##_fmt,     \
-                                os.fmt.container##_kv_fmt); \
+#define DEFINE_MY_OSTREAM_FOR_MAP(container)                 \
+  DECLARE_MY_OSTREAM(container) {                            \
+    return internal::output_all(os,                          \
+                                c.cbegin(),                  \
+                                c.cend(),                    \
+                                os.pref.container##_fmt,     \
+                                os.pref.container##_kv_fmt); \
   }
 
 DEFINE_MY_OSTREAM(array)
