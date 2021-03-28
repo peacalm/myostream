@@ -52,21 +52,22 @@ using ostringstream  = basic_ostream<std::ostringstream>;
 using wostringstream = basic_ostream<std::wostringstream>;
 
 template <typename StringT>
-using std_basic_ostringstream =
+using std_basic_ostringstream_by_string =
     std::basic_ostringstream<typename StringT::value_type,
                              typename StringT::traits_type,
                              typename StringT::allocator_type>;
 
 template <typename StringT>
-using basic_ostringstream = basic_ostream<std_basic_ostringstream<StringT>,
-                                          default_preferences<StringT>>;
+using basic_ostringstream_by_string =
+    basic_ostream<std_basic_ostringstream_by_string<StringT>,
+                  default_preferences<StringT>>;
 
-static_assert(
-    std::is_same<ostringstream, basic_ostringstream<std::string>>::value,
-    "never happen");
-static_assert(
-    std::is_same<wostringstream, basic_ostringstream<std::wstring>>::value,
-    "never happen");
+static_assert(std::is_same<ostringstream,
+                           basic_ostringstream_by_string<std::string>>::value,
+              "never happen");
+static_assert(std::is_same<wostringstream,
+                           basic_ostringstream_by_string<std::wstring>>::value,
+              "never happen");
 
 // output methods
 
