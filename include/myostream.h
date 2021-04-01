@@ -467,14 +467,14 @@ public:
   template <typename... Args>
   string_vector_type to_string_vector(const Args&... args) {
     auto old = ostream_base_type::str();
-    clear_strbuf();
+    clear_buf();
     string_vector_type ret;
     __to_string_vector(ret, args...);
     *this << old;
     return ret;
   }
 
-  void clear_strbuf() { ostream_base_type::str(string_type{}); }
+  void clear_buf() { ostream_base_type::str(string_type{}); }
 
 private:
   void __to_string_vector(string_vector_type& ret) {}
@@ -485,7 +485,7 @@ private:
                           const Args&... args) {
     *this << t;
     ret.push_back(ostream_base_type::str());
-    clear_strbuf();
+    clear_buf();
     __to_string_vector(ret, args...);
   }
 };
