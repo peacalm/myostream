@@ -33,6 +33,52 @@
 
 namespace myostream {
 
+// type traits
+
+template <typename...>
+using void_t = void;
+
+#define MYOSTREAM_DEFINE_TYPE_TRAITS(TYPE)                                   \
+  template <typename T, typename = void>                                     \
+  struct has_##TYPE : public std::false_type {};                             \
+                                                                             \
+  template <typename T>                                                      \
+  struct has_##TYPE<T, void_t<typename T::TYPE>> : public std::true_type {}; \
+                                                                             \
+  template <typename T>                                                      \
+  constexpr bool has_##TYPE##_v = has_##TYPE<T>::value;                      \
+                                                                             \
+  template <typename T, typename Def, bool = has_##TYPE##_v<T>>              \
+  struct get_##TYPE {                                                        \
+    using type = typename T::TYPE;                                           \
+  };                                                                         \
+                                                                             \
+  template <typename T, typename Def>                                        \
+  struct get_##TYPE<T, Def, false> {                                         \
+    using type = Def;                                                        \
+  };                                                                         \
+                                                                             \
+  template <typename T, typename Def>                                        \
+  using get_##TYPE##_t = typename get_##TYPE<T, Def>::type
+
+MYOSTREAM_DEFINE_TYPE_TRAITS(string_type);
+MYOSTREAM_DEFINE_TYPE_TRAITS(traits_type);
+MYOSTREAM_DEFINE_TYPE_TRAITS(allocator_type);
+#undef MYOSTREAM_DEFINE_TYPE_TRAITS
+
+template <typename OstreamT, typename CharT = typename OstreamT::char_type>
+using string_type_by_ostream = get_string_type_t<
+    OstreamT,
+    std::basic_string<CharT,
+                      get_traits_type_t<OstreamT, std::char_traits<CharT>>,
+                      get_allocator_type_t<OstreamT, std::allocator<CharT>>>>;
+
+template <typename StringT>
+using std_basic_ostringstream_by_string =
+    std::basic_ostringstream<typename StringT::value_type,
+                             typename StringT::traits_type,
+                             typename StringT::allocator_type>;
+
 // ==================== declarations ====================
 
 // types
