@@ -151,28 +151,28 @@ basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
     basic_ostream<OstreamBaseT, PreferencesT>& os,
     const std::tuple<Args...>&                 t);
 
-#define DECLARE_MY_OSTREAM(container)                                       \
+#define MYOSTREAM_DECLARE_OVERLOAD(container)                               \
   template <typename OstreamBaseT, typename PreferencesT, typename... Args> \
   basic_ostream<OstreamBaseT, PreferencesT>& operator<<(                    \
       basic_ostream<OstreamBaseT, PreferencesT>& os,                        \
       const std::container<Args...>&             c)
 
-DECLARE_MY_OSTREAM(array);
-DECLARE_MY_OSTREAM(deque);
-DECLARE_MY_OSTREAM(forward_list);
-DECLARE_MY_OSTREAM(initializer_list);
-DECLARE_MY_OSTREAM(list);
-DECLARE_MY_OSTREAM(vector);
+MYOSTREAM_DECLARE_OVERLOAD(array);
+MYOSTREAM_DECLARE_OVERLOAD(deque);
+MYOSTREAM_DECLARE_OVERLOAD(forward_list);
+MYOSTREAM_DECLARE_OVERLOAD(initializer_list);
+MYOSTREAM_DECLARE_OVERLOAD(list);
+MYOSTREAM_DECLARE_OVERLOAD(vector);
 
-DECLARE_MY_OSTREAM(set);
-DECLARE_MY_OSTREAM(multiset);
-DECLARE_MY_OSTREAM(unordered_set);
-DECLARE_MY_OSTREAM(unordered_multiset);
+MYOSTREAM_DECLARE_OVERLOAD(set);
+MYOSTREAM_DECLARE_OVERLOAD(multiset);
+MYOSTREAM_DECLARE_OVERLOAD(unordered_set);
+MYOSTREAM_DECLARE_OVERLOAD(unordered_multiset);
 
-DECLARE_MY_OSTREAM(map);
-DECLARE_MY_OSTREAM(multimap);
-DECLARE_MY_OSTREAM(unordered_map);
-DECLARE_MY_OSTREAM(unordered_multimap);
+MYOSTREAM_DECLARE_OVERLOAD(map);
+MYOSTREAM_DECLARE_OVERLOAD(multimap);
+MYOSTREAM_DECLARE_OVERLOAD(unordered_map);
+MYOSTREAM_DECLARE_OVERLOAD(unordered_multimap);
 
 //! convert all `args` into std::string joined with `", "`
 template <typename... Args>
@@ -525,14 +525,14 @@ basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
   return os;
 }
 
-#define DEFINE_MY_OSTREAM(container)                        \
-  DECLARE_MY_OSTREAM(container) {                           \
+#define MYOSTREAM_DEFINE_OVERLOAD(container)                \
+  MYOSTREAM_DECLARE_OVERLOAD(container) {                   \
     return internal::output_all(                            \
         os, c.cbegin(), c.cend(), os.pref.container##_fmt); \
   }
 
-#define DEFINE_MY_OSTREAM_FOR_MAP(container)                 \
-  DECLARE_MY_OSTREAM(container) {                            \
+#define MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(container)         \
+  MYOSTREAM_DECLARE_OVERLOAD(container) {                    \
     return internal::output_all(os,                          \
                                 c.cbegin(),                  \
                                 c.cend(),                    \
@@ -540,26 +540,26 @@ basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
                                 os.pref.container##_kv_fmt); \
   }
 
-DEFINE_MY_OSTREAM(array)
-DEFINE_MY_OSTREAM(deque)
-DEFINE_MY_OSTREAM(forward_list)
-DEFINE_MY_OSTREAM(initializer_list)
-DEFINE_MY_OSTREAM(list)
-DEFINE_MY_OSTREAM(vector)
+MYOSTREAM_DEFINE_OVERLOAD(array)
+MYOSTREAM_DEFINE_OVERLOAD(deque)
+MYOSTREAM_DEFINE_OVERLOAD(forward_list)
+MYOSTREAM_DEFINE_OVERLOAD(initializer_list)
+MYOSTREAM_DEFINE_OVERLOAD(list)
+MYOSTREAM_DEFINE_OVERLOAD(vector)
 
-DEFINE_MY_OSTREAM(set)
-DEFINE_MY_OSTREAM(multiset)
-DEFINE_MY_OSTREAM(unordered_set)
-DEFINE_MY_OSTREAM(unordered_multiset)
+MYOSTREAM_DEFINE_OVERLOAD(set)
+MYOSTREAM_DEFINE_OVERLOAD(multiset)
+MYOSTREAM_DEFINE_OVERLOAD(unordered_set)
+MYOSTREAM_DEFINE_OVERLOAD(unordered_multiset)
 
-DEFINE_MY_OSTREAM_FOR_MAP(map)
-DEFINE_MY_OSTREAM_FOR_MAP(multimap)
-DEFINE_MY_OSTREAM_FOR_MAP(unordered_map)
-DEFINE_MY_OSTREAM_FOR_MAP(unordered_multimap)
+MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(map)
+MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(multimap)
+MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(unordered_map)
+MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(unordered_multimap)
 
-#undef DEFINE_MY_OSTREAM_FOR_MAP
-#undef DEFINE_MY_OSTREAM
-#undef DECLARE_MY_OSTREAM
+#undef MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP
+#undef MYOSTREAM_DEFINE_OVERLOAD
+#undef MYOSTREAM_DECLARE_OVERLOAD
 
 template <typename... Args>
 std::string tostr(const Args&... args) {
