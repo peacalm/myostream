@@ -106,26 +106,24 @@ template <typename StringT>
 struct default_preferences;
 
 template <typename OstreamBaseT,
-          typename PreferencesT = default_preferences<
-              std::basic_string<typename OstreamBaseT::char_type,
-                                typename OstreamBaseT::traits_type>>>
+          typename PreferencesT =
+              default_preferences<string_type_by_ostream<OstreamBaseT>>>
 class basic_ostream;
+
+template <typename OstreamBaseT,
+          typename PreferencesT =
+              default_preferences<string_type_by_ostream<OstreamBaseT>>>
+class basic_ostringstream;
 
 using ostream        = basic_ostream<std::ostream>;
 using wostream       = basic_ostream<std::wostream>;
-using ostringstream  = basic_ostream<std::ostringstream>;
-using wostringstream = basic_ostream<std::wostringstream>;
-
-template <typename StringT>
-using std_basic_ostringstream_by_string =
-    std::basic_ostringstream<typename StringT::value_type,
-                             typename StringT::traits_type,
-                             typename StringT::allocator_type>;
+using ostringstream  = basic_ostringstream<std::ostringstream>;
+using wostringstream = basic_ostringstream<std::wostringstream>;
 
 template <typename StringT>
 using basic_ostringstream_by_string =
-    basic_ostream<std_basic_ostringstream_by_string<StringT>,
-                  default_preferences<StringT>>;
+    basic_ostringstream<std_basic_ostringstream_by_string<StringT>,
+                        default_preferences<StringT>>;
 
 static_assert(std::is_same<ostringstream,
                            basic_ostringstream_by_string<std::string>>::value,
@@ -367,9 +365,15 @@ public:
   using string_type       = typename preferences_type::string_type;
   using char_type         = typename preferences_type::char_type;
   using format_type       = typename preferences_type::format_type;
+  using traits_type       = typename string_type::traits_type;
+  using allocator_type    = typename string_type::allocator_type;
+
   static_assert(
       std::is_same<typename OstreamBaseT::char_type, char_type>::value,
       "OstreamBaseT::char_type must be same type as PreferencesT::char_type");
+  static_assert(
+      std::is_same<typename OstreamBaseT::traits_type, traits_type>::value,
+      "OstreamBaseT::traits_type must be same type as traits_type");
 
   template <typename... Args>
   explicit basic_ostream(Args&&... args)
@@ -434,6 +438,55 @@ private:
     *this << pref.print_fmt.sep;
     __print(args...);
     return *this;
+  }
+};
+
+template <typename OstreamBaseT, typename PreferencesT>
+class basic_ostringstream : public basic_ostream<OstreamBaseT, PreferencesT> {
+  using base_type = basic_ostream<OstreamBaseT, PreferencesT>;
+
+public:
+  using ostream_base_type  = typename base_type::ostream_base_type;
+  using preferences_type   = typename base_type::preferences_type;
+  using string_type        = typename base_type::string_type;
+  using char_type          = typename base_type::char_type;
+  using format_type        = typename base_type::format_type;
+  using traits_type        = typename base_type::traits_type;
+  using allocator_type     = typename base_type::allocator_type;
+  using string_vector_type = std::vector<string_type>;
+
+  static_assert(
+      std::is_same<typename OstreamBaseT::allocator_type,
+                   allocator_type>::value,
+      "OstreamBaseT::allocator_type must be same type as allocator_type");
+
+  template <typename... Args>
+  basic_ostringstream(Args&&... args)
+      : base_type(std::forward<Args>(args)...) {}
+
+  template <typename... Args>
+  string_vector_type to_string_vector(const Args&... args) {
+    auto old = ostream_base_type::str();
+    clear_strbuf();
+    string_vector_type ret;
+    __to_string_vector(ret, args...);
+    *this << old;
+    return ret;
+  }
+
+  void clear_strbuf() { ostream_base_type::str(string_type{}); }
+
+private:
+  void __to_string_vector(string_vector_type& ret) {}
+
+  template <typename T, typename... Args>
+  void __to_string_vector(string_vector_type& ret,
+                          const T&            t,
+                          const Args&... args) {
+    *this << t;
+    ret.push_back(ostream_base_type::str());
+    clear_strbuf();
+    __to_string_vector(ret, args...);
   }
 };
 
