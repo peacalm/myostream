@@ -38,28 +38,29 @@ namespace myostream {
 template <typename...>
 using void_t = void;
 
-#define MYOSTREAM_DEFINE_TYPE_TRAITS(TYPE)                                   \
-  template <typename T, typename = void>                                     \
-  struct has_##TYPE : public std::false_type {};                             \
-                                                                             \
-  template <typename T>                                                      \
-  struct has_##TYPE<T, void_t<typename T::TYPE>> : public std::true_type {}; \
-                                                                             \
-  template <typename T>                                                      \
-  constexpr bool has_##TYPE##_v = has_##TYPE<T>::value;                      \
-                                                                             \
-  template <typename T, typename Def, bool = has_##TYPE##_v<T>>              \
-  struct get_##TYPE {                                                        \
-    using type = typename T::TYPE;                                           \
-  };                                                                         \
-                                                                             \
-  template <typename T, typename Def>                                        \
-  struct get_##TYPE<T, Def, false> {                                         \
-    using type = Def;                                                        \
-  };                                                                         \
-                                                                             \
-  template <typename T, typename Def>                                        \
-  using get_##TYPE##_t = typename get_##TYPE<T, Def>::type
+#define MYOSTREAM_DEFINE_TYPE_TRAITS(member_type)                      \
+  template <typename T, typename = void>                               \
+  struct has_##member_type : public std::false_type {};                \
+                                                                       \
+  template <typename T>                                                \
+  struct has_##member_type<T, void_t<typename T::member_type>>         \
+      : public std::true_type {};                                      \
+                                                                       \
+  template <typename T>                                                \
+  constexpr bool has_##member_type##_v = has_##member_type<T>::value;  \
+                                                                       \
+  template <typename T, typename Def, bool = has_##member_type##_v<T>> \
+  struct get_##member_type {                                           \
+    using type = typename T::member_type;                              \
+  };                                                                   \
+                                                                       \
+  template <typename T, typename Def>                                  \
+  struct get_##member_type<T, Def, false> {                            \
+    using type = Def;                                                  \
+  };                                                                   \
+                                                                       \
+  template <typename T, typename Def>                                  \
+  using get_##member_type##_t = typename get_##member_type<T, Def>::type
 
 MYOSTREAM_DEFINE_TYPE_TRAITS(string_type);
 MYOSTREAM_DEFINE_TYPE_TRAITS(traits_type);
