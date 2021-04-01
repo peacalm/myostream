@@ -79,6 +79,25 @@ using std_basic_ostringstream_by_string =
                              typename StringT::traits_type,
                              typename StringT::allocator_type>;
 
+static_assert(
+    std::is_same<string_type_by_ostream<std::ostream>, std::string>::value,
+    "never happen");
+static_assert(std::is_same<string_type_by_ostream<std::ostringstream>,
+                           std::string>::value,
+              "never happen");
+static_assert(
+    std::is_same<string_type_by_ostream<std::wostream>, std::wstring>::value,
+    "never happen");
+static_assert(std::is_same<string_type_by_ostream<std::wostringstream>,
+                           std::wstring>::value,
+              "never happen");
+static_assert(std::is_same<std_basic_ostringstream_by_string<std::string>,
+                           std::ostringstream>::value,
+              "never happen");
+static_assert(std::is_same<std_basic_ostringstream_by_string<std::wstring>,
+                           std::wostringstream>::value,
+              "never happen");
+
 // ==================== declarations ====================
 
 // types
