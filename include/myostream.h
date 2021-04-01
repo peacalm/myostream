@@ -575,4 +575,49 @@ std::wstring towstr(const Args&... args) {
   return o.str();
 }
 
+template <typename OstringstreamT>
+inline std::vector<typename OstringstreamT::string_type>
+split_macro_param_names(const std::string& s) {
+  using str_t = typename OstringstreamT::string_type;
+  std::vector<str_t> ret;
+  OstringstreamT     oss;
+  for (size_t i = 0, n = s.size(); i < n; ++i) {
+    bool found_bracket = false;
+    for (const auto& p : {"()", "<>", "{}", "[]"}) {
+      if (s[i] == p[0]) {
+        found_bracket = true;
+        for (int sum = 0;; ++i) {
+          oss << s[i];
+          if (s[i] == p[0]) --sum;
+          if (s[i] == p[1]) ++sum;
+          if (sum == 0) break;
+        }
+      }
+    }
+    if (found_bracket) continue;
+    if (s[i] == ',') {
+      ret.push_back(oss.str());
+      oss.str(str_t{});
+      while (i + 1 < n && s[i + 1] == ' ') ++i;
+    } else {
+      oss << s[i];
+    }
+  }
+  ret.push_back(oss.str());
+  return ret;
+}
+
+#define MYOSTREAM_WATCH(out_stream, kv_sep, param_delim, ...)               \
+  do {                                                                      \
+    using oss_t = myostream::basic_ostringstream_by_string<decltype(        \
+        out_stream)::string_type>;                                          \
+    oss_t oss;                                                              \
+    auto  names  = myostream::split_macro_param_names<oss_t>(#__VA_ARGS__); \
+    auto  values = oss.to_string_vector(__VA_ARGS__);                       \
+    assert(names.size() == values.size());                                  \
+    for (size_t i = 0; i < names.size(); ++i) {                             \
+      out_stream << names[i] << kv_sep << values[i] << param_delim;         \
+    }                                                                       \
+  } while (0)
+
 }  // namespace myostream
