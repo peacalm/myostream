@@ -26,23 +26,35 @@ Supported container or container-like types:
 * std::unordered_multimap
 
 
-## Usage
-### class: myostream::basic_ostream<OstreamBaseT, PreferencesT=default_preferences>
+## Introduction
 
+### Class: myostream::basic_ostream<OstreamBaseT, PreferencesT=default_preferences>
 You need to put at least an `OstreamBaseT` into the first template parameter 
-as a base class, e.g. `myostream::basic_ostream<std::ostringstream>`, which 
-indicates where the output writes to. 
+as a base class, e.g. `myostream::basic_ostream<std::ostream>` or 
+`myostream::basic_ostream<std::wostringstream>`, which indicates where the 
+output writes to. 
 And you can put an optional second template parameter `PreferencesT` 
 to specify your preferred left-border, right-border and separator for each 
 container type, or just use the default preferences.
 
+### Class: myostream::basic_ostringstream<OstreamBaseT, PreferencesT=default_preferences>
+This class `myostream::basic_ostringstream` is derived from 
+`myostream::basic_ostream`, and has the same template parameters, a required 
+`OstreamBaseT` and an optional `PreferencesT`. But here the `OstreamBaseT` 
+should be a "stringstream type", which has a member methd `str()` to get a 
+string representing the output result. e.g. 
+`myostream::basic_ostringstream<std::ostringstream>` is valid, but 
+`myostream::basic_ostringstream<std::ostream>` will get a compile error.
+
+### Pre-defined convenient types
 What's more, there are useful pre-defined ostream types with 
 default preferences:
 * ostream  = basic_ostream\<std::ostream>
 * wostream = basic_ostream\<std::wostream>
-* ostringstream  = basic_ostream\<std::ostringstream>
-* wostringstream = basic_ostream\<std::wostringstream>
+* ostringstream  = basic_ostringstream\<std::ostringstream>
+* wostringstream = basic_ostringstream\<std::wostringstream>
 
+### Details
 This lib overloads `operator<<` for the class `basic_ostream` with each 
 supported container type, the declaration pseudocode looks like(the key word
 `SomeSupportedContainerType` in the following code actually might be 
@@ -76,6 +88,18 @@ basic_ostream& print_range(Iterator begin, Iterator end,
                            const format_type& range_fmt);
 ```
 
+The class `basic_ostringstream` is derived from `basic_ostream` by public, so 
+it has all member functions of the latter. What's more, the former has unique 
+member functions:
+```c++
+/// print args into a std::vector<string_type>
+template <typename... Args>
+string_vector_type to_string_vector(const Args&... args);
+
+/// clear the string buffer which stores all outputs beforehand
+void clear_buf();
+```
+
 Example:
 ```c++
 // output to stdout
@@ -97,7 +121,7 @@ mycout.print("hello ").println("world", 123, vi);
 // hello world, 123, [1, 2, 3]
 ```
 
-### function: myostream::tostr(const Args&... args)
+### Function: myostream::tostr(const Args&... args)
 One line code to convert multiple arguments into std::string, seperated by ", ".
 
 Example:
@@ -107,10 +131,14 @@ std::cout << myostream::tostr("show \"tostr\"", vi) << std::endl;
 // show "tostr", [1, 2, 3]
 ```
 
-### function: myostream::towstr(const Args&... args)
+### Function: myostream::towstr(const Args&... args)
 All same as `myostream::tostr` except result into std::wstring and seperated 
 by L", ".
 
+### Macro: MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...)
+Print all variables in parameter `...` along with their names to `out_stream` 
+in format "var1-name kv_sep var1-value param_sep var2-name kv_sep var2-value 
+param_sep ... final_delim".
 
 ## Install
 Install the lib to your computer:  
