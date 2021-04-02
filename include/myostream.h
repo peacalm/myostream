@@ -33,6 +33,72 @@
 
 namespace myostream {
 
+// type traits
+
+template <typename...>
+using void_t = void;
+
+#define MYOSTREAM_DEFINE_TYPE_TRAITS(member_type)                      \
+  template <typename T, typename = void>                               \
+  struct has_##member_type : public std::false_type {};                \
+                                                                       \
+  template <typename T>                                                \
+  struct has_##member_type<T, void_t<typename T::member_type>>         \
+      : public std::true_type {};                                      \
+                                                                       \
+  template <typename T>                                                \
+  constexpr bool has_##member_type##_v = has_##member_type<T>::value;  \
+                                                                       \
+  template <typename T, typename Def, bool = has_##member_type##_v<T>> \
+  struct get_##member_type {                                           \
+    using type = typename T::member_type;                              \
+  };                                                                   \
+                                                                       \
+  template <typename T, typename Def>                                  \
+  struct get_##member_type<T, Def, false> {                            \
+    using type = Def;                                                  \
+  };                                                                   \
+                                                                       \
+  template <typename T, typename Def>                                  \
+  using get_##member_type##_t = typename get_##member_type<T, Def>::type
+
+MYOSTREAM_DEFINE_TYPE_TRAITS(string_type);
+MYOSTREAM_DEFINE_TYPE_TRAITS(traits_type);
+MYOSTREAM_DEFINE_TYPE_TRAITS(allocator_type);
+#undef MYOSTREAM_DEFINE_TYPE_TRAITS
+
+template <typename OstreamT, typename CharT = typename OstreamT::char_type>
+using string_type_by_ostream = get_string_type_t<
+    OstreamT,
+    std::basic_string<CharT,
+                      get_traits_type_t<OstreamT, std::char_traits<CharT>>,
+                      get_allocator_type_t<OstreamT, std::allocator<CharT>>>>;
+
+template <typename StringT>
+using std_basic_ostringstream_by_string =
+    std::basic_ostringstream<typename StringT::value_type,
+                             typename StringT::traits_type,
+                             typename StringT::allocator_type>;
+
+static_assert(
+    std::is_same<string_type_by_ostream<std::ostream>, std::string>::value,
+    "never happen");
+static_assert(std::is_same<string_type_by_ostream<std::ostringstream>,
+                           std::string>::value,
+              "never happen");
+static_assert(
+    std::is_same<string_type_by_ostream<std::wostream>, std::wstring>::value,
+    "never happen");
+static_assert(std::is_same<string_type_by_ostream<std::wostringstream>,
+                           std::wstring>::value,
+              "never happen");
+static_assert(std::is_same<std_basic_ostringstream_by_string<std::string>,
+                           std::ostringstream>::value,
+              "never happen");
+static_assert(std::is_same<std_basic_ostringstream_by_string<std::wstring>,
+                           std::wostringstream>::value,
+              "never happen");
+
 // ==================== declarations ====================
 
 // types
@@ -41,26 +107,24 @@ template <typename StringT>
 struct default_preferences;
 
 template <typename OstreamBaseT,
-          typename PreferencesT = default_preferences<
-              std::basic_string<typename OstreamBaseT::char_type,
-                                typename OstreamBaseT::traits_type>>>
+          typename PreferencesT =
+              default_preferences<string_type_by_ostream<OstreamBaseT>>>
 class basic_ostream;
+
+template <typename OstreamBaseT,
+          typename PreferencesT =
+              default_preferences<string_type_by_ostream<OstreamBaseT>>>
+class basic_ostringstream;
 
 using ostream        = basic_ostream<std::ostream>;
 using wostream       = basic_ostream<std::wostream>;
-using ostringstream  = basic_ostream<std::ostringstream>;
-using wostringstream = basic_ostream<std::wostringstream>;
-
-template <typename StringT>
-using std_basic_ostringstream_by_string =
-    std::basic_ostringstream<typename StringT::value_type,
-                             typename StringT::traits_type,
-                             typename StringT::allocator_type>;
+using ostringstream  = basic_ostringstream<std::ostringstream>;
+using wostringstream = basic_ostringstream<std::wostringstream>;
 
 template <typename StringT>
 using basic_ostringstream_by_string =
-    basic_ostream<std_basic_ostringstream_by_string<StringT>,
-                  default_preferences<StringT>>;
+    basic_ostringstream<std_basic_ostringstream_by_string<StringT>,
+                        default_preferences<StringT>>;
 
 static_assert(std::is_same<ostringstream,
                            basic_ostringstream_by_string<std::string>>::value,
@@ -88,28 +152,28 @@ basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
     basic_ostream<OstreamBaseT, PreferencesT>& os,
     const std::tuple<Args...>&                 t);
 
-#define DECLARE_MY_OSTREAM(container)                                       \
+#define MYOSTREAM_DECLARE_OVERLOAD(container)                               \
   template <typename OstreamBaseT, typename PreferencesT, typename... Args> \
   basic_ostream<OstreamBaseT, PreferencesT>& operator<<(                    \
       basic_ostream<OstreamBaseT, PreferencesT>& os,                        \
       const std::container<Args...>&             c)
 
-DECLARE_MY_OSTREAM(array);
-DECLARE_MY_OSTREAM(deque);
-DECLARE_MY_OSTREAM(forward_list);
-DECLARE_MY_OSTREAM(initializer_list);
-DECLARE_MY_OSTREAM(list);
-DECLARE_MY_OSTREAM(vector);
+MYOSTREAM_DECLARE_OVERLOAD(array);
+MYOSTREAM_DECLARE_OVERLOAD(deque);
+MYOSTREAM_DECLARE_OVERLOAD(forward_list);
+MYOSTREAM_DECLARE_OVERLOAD(initializer_list);
+MYOSTREAM_DECLARE_OVERLOAD(list);
+MYOSTREAM_DECLARE_OVERLOAD(vector);
 
-DECLARE_MY_OSTREAM(set);
-DECLARE_MY_OSTREAM(multiset);
-DECLARE_MY_OSTREAM(unordered_set);
-DECLARE_MY_OSTREAM(unordered_multiset);
+MYOSTREAM_DECLARE_OVERLOAD(set);
+MYOSTREAM_DECLARE_OVERLOAD(multiset);
+MYOSTREAM_DECLARE_OVERLOAD(unordered_set);
+MYOSTREAM_DECLARE_OVERLOAD(unordered_multiset);
 
-DECLARE_MY_OSTREAM(map);
-DECLARE_MY_OSTREAM(multimap);
-DECLARE_MY_OSTREAM(unordered_map);
-DECLARE_MY_OSTREAM(unordered_multimap);
+MYOSTREAM_DECLARE_OVERLOAD(map);
+MYOSTREAM_DECLARE_OVERLOAD(multimap);
+MYOSTREAM_DECLARE_OVERLOAD(unordered_map);
+MYOSTREAM_DECLARE_OVERLOAD(unordered_multimap);
 
 //! convert all `args` into std::string joined with `", "`
 template <typename... Args>
@@ -302,9 +366,15 @@ public:
   using string_type       = typename preferences_type::string_type;
   using char_type         = typename preferences_type::char_type;
   using format_type       = typename preferences_type::format_type;
+  using traits_type       = typename string_type::traits_type;
+  using allocator_type    = typename string_type::allocator_type;
+
   static_assert(
       std::is_same<typename OstreamBaseT::char_type, char_type>::value,
       "OstreamBaseT::char_type must be same type as PreferencesT::char_type");
+  static_assert(
+      std::is_same<typename OstreamBaseT::traits_type, traits_type>::value,
+      "OstreamBaseT::traits_type must be same type as traits_type");
 
   template <typename... Args>
   explicit basic_ostream(Args&&... args)
@@ -372,6 +442,55 @@ private:
   }
 };
 
+template <typename OstreamBaseT, typename PreferencesT>
+class basic_ostringstream : public basic_ostream<OstreamBaseT, PreferencesT> {
+  using base_type = basic_ostream<OstreamBaseT, PreferencesT>;
+
+public:
+  using ostream_base_type  = typename base_type::ostream_base_type;
+  using preferences_type   = typename base_type::preferences_type;
+  using string_type        = typename base_type::string_type;
+  using char_type          = typename base_type::char_type;
+  using format_type        = typename base_type::format_type;
+  using traits_type        = typename base_type::traits_type;
+  using allocator_type     = typename base_type::allocator_type;
+  using string_vector_type = std::vector<string_type>;
+
+  static_assert(
+      std::is_same<typename OstreamBaseT::allocator_type,
+                   allocator_type>::value,
+      "OstreamBaseT::allocator_type must be same type as allocator_type");
+
+  template <typename... Args>
+  basic_ostringstream(Args&&... args)
+      : base_type(std::forward<Args>(args)...) {}
+
+  template <typename... Args>
+  string_vector_type to_string_vector(const Args&... args) {
+    auto old = ostream_base_type::str();
+    clear_buf();
+    string_vector_type ret;
+    __to_string_vector(ret, args...);
+    *this << old;
+    return ret;
+  }
+
+  void clear_buf() { ostream_base_type::str(string_type{}); }
+
+private:
+  void __to_string_vector(string_vector_type& ret) {}
+
+  template <typename T, typename... Args>
+  void __to_string_vector(string_vector_type& ret,
+                          const T&            t,
+                          const Args&... args) {
+    *this << t;
+    ret.push_back(ostream_base_type::str());
+    clear_buf();
+    __to_string_vector(ret, args...);
+  }
+};
+
 template <typename OstreamBaseT,
           typename PreferencesT,
           typename FirstT,
@@ -407,14 +526,14 @@ basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
   return os;
 }
 
-#define DEFINE_MY_OSTREAM(container)                        \
-  DECLARE_MY_OSTREAM(container) {                           \
+#define MYOSTREAM_DEFINE_OVERLOAD(container)                \
+  MYOSTREAM_DECLARE_OVERLOAD(container) {                   \
     return internal::output_all(                            \
         os, c.cbegin(), c.cend(), os.pref.container##_fmt); \
   }
 
-#define DEFINE_MY_OSTREAM_FOR_MAP(container)                 \
-  DECLARE_MY_OSTREAM(container) {                            \
+#define MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(container)         \
+  MYOSTREAM_DECLARE_OVERLOAD(container) {                    \
     return internal::output_all(os,                          \
                                 c.cbegin(),                  \
                                 c.cend(),                    \
@@ -422,26 +541,26 @@ basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
                                 os.pref.container##_kv_fmt); \
   }
 
-DEFINE_MY_OSTREAM(array)
-DEFINE_MY_OSTREAM(deque)
-DEFINE_MY_OSTREAM(forward_list)
-DEFINE_MY_OSTREAM(initializer_list)
-DEFINE_MY_OSTREAM(list)
-DEFINE_MY_OSTREAM(vector)
+MYOSTREAM_DEFINE_OVERLOAD(array)
+MYOSTREAM_DEFINE_OVERLOAD(deque)
+MYOSTREAM_DEFINE_OVERLOAD(forward_list)
+MYOSTREAM_DEFINE_OVERLOAD(initializer_list)
+MYOSTREAM_DEFINE_OVERLOAD(list)
+MYOSTREAM_DEFINE_OVERLOAD(vector)
 
-DEFINE_MY_OSTREAM(set)
-DEFINE_MY_OSTREAM(multiset)
-DEFINE_MY_OSTREAM(unordered_set)
-DEFINE_MY_OSTREAM(unordered_multiset)
+MYOSTREAM_DEFINE_OVERLOAD(set)
+MYOSTREAM_DEFINE_OVERLOAD(multiset)
+MYOSTREAM_DEFINE_OVERLOAD(unordered_set)
+MYOSTREAM_DEFINE_OVERLOAD(unordered_multiset)
 
-DEFINE_MY_OSTREAM_FOR_MAP(map)
-DEFINE_MY_OSTREAM_FOR_MAP(multimap)
-DEFINE_MY_OSTREAM_FOR_MAP(unordered_map)
-DEFINE_MY_OSTREAM_FOR_MAP(unordered_multimap)
+MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(map)
+MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(multimap)
+MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(unordered_map)
+MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(unordered_multimap)
 
-#undef DEFINE_MY_OSTREAM_FOR_MAP
-#undef DEFINE_MY_OSTREAM
-#undef DECLARE_MY_OSTREAM
+#undef MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP
+#undef MYOSTREAM_DEFINE_OVERLOAD
+#undef MYOSTREAM_DECLARE_OVERLOAD
 
 template <typename... Args>
 std::string tostr(const Args&... args) {
@@ -456,5 +575,54 @@ std::wstring towstr(const Args&... args) {
   o.print(args...);
   return o.str();
 }
+
+template <typename OstringstreamT>
+inline std::vector<typename OstringstreamT::string_type>
+split_macro_param_names(const std::string& s) {
+  using str_t = typename OstringstreamT::string_type;
+  std::vector<str_t> ret;
+  OstringstreamT     oss;
+  for (size_t i = 0, n = s.size(); i < n; ++i) {
+    bool found_bracket = false;
+    for (const auto& p : {"()", "<>", "{}", "[]"}) {
+      if (s[i] == p[0]) {
+        found_bracket = true;
+        for (int sum = 0;; ++i) {
+          oss << s[i];
+          if (s[i] == p[0]) --sum;
+          if (s[i] == p[1]) ++sum;
+          if (sum == 0) break;
+        }
+      }
+    }
+    if (found_bracket) continue;
+    if (s[i] == ',') {
+      ret.push_back(oss.str());
+      oss.str(str_t{});
+      while (i + 1 < n && s[i + 1] == ' ') ++i;
+    } else {
+      oss << s[i];
+    }
+  }
+  ret.push_back(oss.str());
+  return ret;
+}
+
+#define MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...)    \
+  do {                                                                      \
+    using oss_t = myostream::basic_ostringstream_by_string<decltype(        \
+        out_stream)::string_type>;                                          \
+    oss_t oss;                                                              \
+    auto  names  = myostream::split_macro_param_names<oss_t>(#__VA_ARGS__); \
+    auto  values = oss.to_string_vector(__VA_ARGS__);                       \
+    assert(names.size() == values.size());                                  \
+    for (size_t i = 0; i < names.size(); ++i) {                             \
+      if (i > 0) out_stream << param_sep;                                   \
+      out_stream << names[i];                                               \
+      out_stream << kv_sep;                                                 \
+      out_stream << values[i];                                              \
+    }                                                                       \
+    out_stream << final_delim;                                              \
+  } while (0)
 
 }  // namespace myostream
