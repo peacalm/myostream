@@ -89,8 +89,8 @@ basic_ostream& print_range(Iterator begin, Iterator end,
 ```
 
 The class `basic_ostringstream` is derived from `basic_ostream` by public, so 
-it has all member functions of the latter. What's more, the former has unique 
-member functions:
+it has all member functions of the latter as mentioned above. Moreover, the 
+former has unique member functions:
 ```c++
 /// print args into a std::vector<string_type>
 template <typename... Args>
