@@ -608,7 +608,7 @@ split_macro_param_names(const std::string& s) {
   return ret;
 }
 
-#define MYOSTREAM_WATCH(out_stream, kv_sep, param_delim, ...)               \
+#define MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...)    \
   do {                                                                      \
     using oss_t = myostream::basic_ostringstream_by_string<decltype(        \
         out_stream)::string_type>;                                          \
@@ -617,8 +617,12 @@ split_macro_param_names(const std::string& s) {
     auto  values = oss.to_string_vector(__VA_ARGS__);                       \
     assert(names.size() == values.size());                                  \
     for (size_t i = 0; i < names.size(); ++i) {                             \
-      out_stream << names[i] << kv_sep << values[i] << param_delim;         \
+      if (i > 0) out_stream << param_sep;                                   \
+      out_stream << names[i];                                               \
+      out_stream << kv_sep;                                                 \
+      out_stream << values[i];                                              \
     }                                                                       \
+    out_stream << final_delim;                                              \
   } while (0)
 
 }  // namespace myostream
