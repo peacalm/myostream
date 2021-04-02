@@ -159,6 +159,27 @@ std::set<int>{1,2,3} = {1, 2, 3}
 
 ```
 
+### Macro: MYOSTREAM_WATCH_TO_STRING(string_type, kv_sep, param_sep, final_delim, ...)
+Like `MYOSTREAM_WATCH`, but convert the result to string with type 
+`string_type`.
+
+Example:
+```c++
+int i = 123;
+std::set<int> si{1,2,3};
+std::cout << MYOSTREAM_WATCH_TO_STRING(std::string, ':', '\n', "\n----\n", i, si, 123);
+std::wcout << MYOSTREAM_WATCH_TO_STRING(std::wstring, L" = ", '\n', '\n', i, si, 123);
+```
+Result:
+```text
+i:123
+si:{1, 2, 3}
+123:123
+----
+i = 123
+si = {1, 2, 3}
+123 = 123
+```
 ## Install
 Install the lib to your computer:  
 ```bash
