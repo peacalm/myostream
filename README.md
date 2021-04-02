@@ -140,6 +140,28 @@ Print all variables in parameter `...` along with their names to `out_stream`
 in format "var1-name kv_sep var1-value param_sep var2-name kv_sep var2-value 
 param_sep ... final_delim".
 
+Example:
+```c++
+myostream::ostream mycout(std::cout.rdbuf());
+#define watch(...)                                             \
+  do {                                                         \
+    MYOSTREAM_WATCH(mycout, " = ", "\n", "\n\n", __VA_ARGS__); \
+  } while (0)
+
+int i = 123;
+std::set<int> si{1,2,3};
+watch(i, 123, si, std::set<int>{1,2,3}, "strings");
+```
+Result:
+```text
+i = 123
+123 = 123
+si = {1, 2, 3}
+std::set<int>{1,2,3} = {1, 2, 3}
+"strings" = strings
+
+```
+
 ## Install
 Install the lib to your computer:  
 ```bash
