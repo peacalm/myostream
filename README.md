@@ -143,10 +143,7 @@ param_sep ... final_delim".
 Example:
 ```c++
 myostream::ostream mycout(std::cout.rdbuf());
-#define watch(...)                                             \
-  do {                                                         \
-    MYOSTREAM_WATCH(mycout, " = ", "\n", "\n\n", __VA_ARGS__); \
-  } while (0)
+#define watch(...) MYOSTREAM_WATCH(mycout, " = ", "\n", "\n\n", __VA_ARGS__)
 
 int i = 123;
 std::set<int> si{1,2,3};
