@@ -627,15 +627,16 @@ template <typename OstringstreamT,
           typename ParamSepT,
           typename FinalDelimT,
           typename... Args>
-inline typename OstringstreamT::string_type watch_to_string(
-    const KvSepT&      kv_sep,
-    const ParamSepT&   param_sep,
-    const FinalDelimT& final_delim,
-    const std::string& var_names,
-    const Args&... args) {
-  OstringstreamT oss;
-  auto           names  = split_macro_param_names<OstringstreamT>(var_names);
-  auto           values = oss.to_string_vector(args...);
+inline OstringstreamT&& watch_to_ostringstream(OstringstreamT&&   oss,
+                                               const KvSepT&      kv_sep,
+                                               const ParamSepT&   param_sep,
+                                               const FinalDelimT& final_delim,
+                                               const std::string& var_names,
+                                               const Args&... args) {
+  auto names =
+      split_macro_param_names<typename std::decay<OstringstreamT>::type>(
+          var_names);
+  auto values = oss.to_string_vector(args...);
   assert(names.size() == values.size());
   for (size_t i = 0; i < names.size(); ++i) {
     if (i > 0) oss << param_sep;
@@ -644,8 +645,40 @@ inline typename OstringstreamT::string_type watch_to_string(
     oss << values[i];
   }
   oss << final_delim;
+  return oss;
+}
+
+template <typename OstringstreamT,
+          typename KvSepT,
+          typename ParamSepT,
+          typename FinalDelimT,
+          typename... Args>
+inline typename OstringstreamT::string_type watch_to_string(
+    const KvSepT&      kv_sep,
+    const ParamSepT&   param_sep,
+    const FinalDelimT& final_delim,
+    const std::string& var_names,
+    const Args&... args) {
+  OstringstreamT oss;
+  watch_to_ostringstream(
+      oss, kv_sep, param_sep, final_delim, var_names, args...);
   return oss.str();
 }
+
+#define MYOSTREAM_WATCH_TO_OSTRINGSTREAM(                 \
+    out_stringtream, kv_sep, param_sep, final_delim, ...) \
+  watch_to_ostringstream(out_stringtream,                 \
+                         kv_sep,                          \
+                         param_sep,                       \
+                         final_delim,                     \
+                         #__VA_ARGS__,                    \
+                         __VA_ARGS__)
+
+#define MYOSTREAM_WATCH_TO_STRING(                            \
+    string_type, kv_sep, param_sep, final_delim, ...)         \
+  myostream::watch_to_string<                                 \
+      myostream::basic_ostringstream_by_string<string_type>>( \
+      kv_sep, param_sep, final_delim, #__VA_ARGS__, __VA_ARGS__)
 
 #define MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...)    \
   do {                                                                      \
@@ -663,11 +696,5 @@ inline typename OstringstreamT::string_type watch_to_string(
     }                                                                       \
     out_stream << final_delim;                                              \
   } while (0)
-
-#define MYOSTREAM_WATCH_TO_STRING(                            \
-    string_type, kv_sep, param_sep, final_delim, ...)         \
-  myostream::watch_to_string<                                 \
-      myostream::basic_ostringstream_by_string<string_type>>( \
-      kv_sep, param_sep, final_delim, #__VA_ARGS__, __VA_ARGS__)
 
 }  // namespace myostream
