@@ -152,13 +152,19 @@ basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
     basic_ostream<OstreamBaseT, PreferencesT>& os,
     const std::tuple<Args...>&                 t);
 
+template <typename OstreamBaseT,
+          typename PreferencesT,
+          typename T,
+          std::size_t N>
+basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
+    basic_ostream<OstreamBaseT, PreferencesT>& os, const std::array<T, N>& c);
+
 #define MYOSTREAM_DECLARE_OVERLOAD(container)                               \
   template <typename OstreamBaseT, typename PreferencesT, typename... Args> \
   basic_ostream<OstreamBaseT, PreferencesT>& operator<<(                    \
       basic_ostream<OstreamBaseT, PreferencesT>& os,                        \
       const std::container<Args...>&             c)
 
-MYOSTREAM_DECLARE_OVERLOAD(array);
 MYOSTREAM_DECLARE_OVERLOAD(deque);
 MYOSTREAM_DECLARE_OVERLOAD(forward_list);
 MYOSTREAM_DECLARE_OVERLOAD(initializer_list);
@@ -526,6 +532,15 @@ basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
   return os;
 }
 
+template <typename OstreamBaseT,
+          typename PreferencesT,
+          typename T,
+          std::size_t N>
+basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
+    basic_ostream<OstreamBaseT, PreferencesT>& os, const std::array<T, N>& c) {
+  return internal::output_all(os, c.cbegin(), c.cend(), os.pref.array_fmt);
+}
+
 #define MYOSTREAM_DEFINE_OVERLOAD(container)                \
   MYOSTREAM_DECLARE_OVERLOAD(container) {                   \
     return internal::output_all(                            \
@@ -541,7 +556,6 @@ basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
                                 os.pref.container##_kv_fmt); \
   }
 
-MYOSTREAM_DEFINE_OVERLOAD(array)
 MYOSTREAM_DEFINE_OVERLOAD(deque)
 MYOSTREAM_DEFINE_OVERLOAD(forward_list)
 MYOSTREAM_DEFINE_OVERLOAD(initializer_list)
