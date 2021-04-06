@@ -106,15 +106,33 @@ static_assert(std::is_same<std_basic_ostringstream_by_string<std::wstring>,
 template <typename StringT>
 struct default_preferences;
 
-template <typename OstreamBaseT,
-          typename PreferencesT =
-              default_preferences<string_type_by_ostream<OstreamBaseT>>>
-class basic_ostream;
+template <typename OstreamBaseT>
+using default_preferences_by_ostream_base =
+    default_preferences<string_type_by_ostream<OstreamBaseT>>;
+
+template <typename OstreamBaseT>
+using const_default_preferences_by_ostream_base = typename std::add_const<
+    default_preferences_by_ostream_base<OstreamBaseT>>::type;
 
 template <typename OstreamBaseT,
           typename PreferencesT =
-              default_preferences<string_type_by_ostream<OstreamBaseT>>>
+              default_preferences_by_ostream_base<OstreamBaseT>>
+class basic_ostream;
+
+template <typename OstreamBaseT>
+using basic_ostream_with_const_default_preferences =
+    basic_ostream<OstreamBaseT,
+                  const_default_preferences_by_ostream_base<OstreamBaseT>>;
+
+template <typename OstreamBaseT,
+          typename PreferencesT =
+              default_preferences_by_ostream_base<OstreamBaseT>>
 class basic_ostringstream;
+
+template <typename OstreamBaseT>
+using basic_ostringstream_with_const_default_preferences = basic_ostringstream<
+    OstreamBaseT,
+    const_default_preferences_by_ostream_base<OstreamBaseT>>;
 
 using ostream        = basic_ostream<std::ostream>;
 using wostream       = basic_ostream<std::wostream>;
@@ -600,15 +618,23 @@ MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(unordered_multimap)
 
 template <typename... Args>
 std::string tostr(const Args&... args) {
-  ostringstream o;
+  using type =
+      basic_ostringstream_with_const_default_preferences<std::ostringstream>;
+  type o(placeholder::no_init_preferences{});
+  o.set_preferences_ptr(type::preferences_type::static_ins_ptr());
   o.print(args...);
+  o.clear_preferences_ptr();
   return o.str();
 }
 
 template <typename... Args>
 std::wstring towstr(const Args&... args) {
-  wostringstream o;
+  using type =
+      basic_ostringstream_with_const_default_preferences<std::wostringstream>;
+  type o(placeholder::no_init_preferences{});
+  o.set_preferences_ptr(type::preferences_type::static_ins_ptr());
   o.print(args...);
+  o.clear_preferences_ptr();
   return o.str();
 }
 
