@@ -105,20 +105,26 @@ Example:
 // output to stdout
 myostream::ostream mycout(std::cout.rdbuf());
 std::vector<int> vi{1, 2, 3};
-mycout << vi << std::endl;  // [1, 2, 3]
+mycout << vi << std::endl;
 std::map<std::string, std::vector<double>> msvd{
     {"Alice", {95, 87.5}}, {"Bob", {79, 99.5}}};
-mycout << msvd << std::endl;  // {Alice: [95, 87.5], Bob: [79, 99.5]}
+mycout << msvd << std::endl;
 
 // convert to std::string
 myostream::ostringstream myoss;
 std::vector<std::set<int>> vsi{{1, 2, 3}, {100, 200}};
 myoss << vsi;
-std::cout << myoss.str() << std::endl;  // [{1, 2, 3}, {100, 200}]
+std::cout << myoss.str() << std::endl;
 
 // use print, println
 mycout.print("hello ").println("world", 123, vi);
-// hello world, 123, [1, 2, 3]
+```
+Result:
+```text
+[1, 2, 3]
+{Alice: [95, 87.5], Bob: [79, 99.5]}
+[{1, 2, 3}, {100, 200}]
+hello world, 123, [1, 2, 3]
 ```
 
 ### Function: myostream::tostr(const Args&... args)
@@ -128,7 +134,10 @@ Example:
 ```c++
 std::vector<int> vi{1, 2, 3};
 std::cout << myostream::tostr("show \"tostr\"", vi) << std::endl;
-// show "tostr", [1, 2, 3]
+```
+Result:
+```text
+show "tostr", [1, 2, 3]
 ```
 
 ### Function: myostream::towstr(const Args&... args)
