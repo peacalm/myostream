@@ -729,12 +729,12 @@ inline ResultStringT watch_to_string(const KvSepT&      kv_sep,
 
 #define MYOSTREAM_WATCH_TO_OSTRINGSTREAM(                 \
     out_stringtream, kv_sep, param_sep, final_delim, ...) \
-  watch_to_ostringstream(out_stringtream,                 \
-                         kv_sep,                          \
-                         param_sep,                       \
-                         final_delim,                     \
-                         #__VA_ARGS__,                    \
-                         __VA_ARGS__)
+  myostream::watch_to_ostringstream(out_stringtream,      \
+                                    kv_sep,               \
+                                    param_sep,            \
+                                    final_delim,          \
+                                    #__VA_ARGS__,         \
+                                    __VA_ARGS__)
 
 #define MYOSTREAM_WATCH_TO_STRING(                    \
     string_type, kv_sep, param_sep, final_delim, ...) \
