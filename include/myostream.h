@@ -350,7 +350,7 @@ template <typename OstreamT, typename TupleT, size_t N>
 struct tuple_printer {
   static void print(OstreamT& os, const TupleT& t) {
     tuple_printer<OstreamT, TupleT, N - 1>::print(os, t);
-    os << os.pref.tuple_fmt.sep;
+    os << os.preferences().tuple_fmt.sep;
     os << std::get<N - 1>(t);
   }
 };
@@ -384,13 +384,22 @@ public:
 
   template <typename... Args>
   explicit basic_ostream(Args&&... args)
-      : base_type(std::forward<Args>(args)...) {}
+      : base_type(std::forward<Args>(args)...) {
+    preferences_ptr = new preferences_type;
+  }
+
+  ~basic_ostream() {
+    if (preferences_ptr) {
+      delete preferences_ptr;
+      preferences_ptr = nullptr;
+    }
+  }
 
   template <typename... Args>
   basic_ostream& print(const Args&... args) {
-    *this << pref.print_fmt.lb;
+    *this << preferences().print_fmt.lb;
     __print(args...);
-    *this << pref.print_fmt.rb;
+    *this << preferences().print_fmt.rb;
     return *this;
   }
 
@@ -402,7 +411,7 @@ public:
 
   template <typename Iterator>
   basic_ostream& print_range(Iterator begin, Iterator end) {
-    return print_range(begin, end, pref.print_range_fmt);
+    return print_range(begin, end, preferences().print_range_fmt);
   }
 
   template <typename Iterator>
@@ -418,17 +427,8 @@ public:
     return *this;
   }
 
-  basic_ostream& with_pref(const preferences_type& p) {
-    pref = p;
-    return *this;
-  }
-
-  basic_ostream& with_pref(preferences_type&& p) {
-    pref = std::move(p);
-    return *this;
-  }
-
-  preferences_type pref;
+  preferences_type&       preferences() { return *preferences_ptr; }
+  const preferences_type& preferences() const { return *preferences_ptr; }
 
 private:
   basic_ostream& __print() { return *this; }
@@ -442,10 +442,12 @@ private:
   template <typename T, typename... Args>
   basic_ostream& __print(const T& t, const Args&... args) {
     *this << t;
-    *this << pref.print_fmt.sep;
+    *this << preferences().print_fmt.sep;
     __print(args...);
     return *this;
   }
+
+  preferences_type* preferences_ptr;
 };
 
 template <typename OstreamBaseT, typename PreferencesT>
@@ -504,19 +506,19 @@ template <typename OstreamBaseT,
 basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
     basic_ostream<OstreamBaseT, PreferencesT>& os,
     const std::pair<FirstT, SecondT>&          p) {
-  os << os.pref.pair_fmt.lb;
+  os << os.preferences().pair_fmt.lb;
   os << p.first;
-  os << os.pref.pair_fmt.sep;
+  os << os.preferences().pair_fmt.sep;
   os << p.second;
-  os << os.pref.pair_fmt.rb;
+  os << os.preferences().pair_fmt.rb;
   return os;
 }
 
 template <typename OstreamBaseT, typename PreferencesT>
 basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
     basic_ostream<OstreamBaseT, PreferencesT>& os, const std::tuple<>& t) {
-  os << os.pref.tuple_fmt.lb;
-  os << os.pref.tuple_fmt.rb;
+  os << os.preferences().tuple_fmt.lb;
+  os << os.preferences().tuple_fmt.rb;
   return os;
 }
 
@@ -524,11 +526,11 @@ template <typename OstreamBaseT, typename PreferencesT, typename... Args>
 basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
     basic_ostream<OstreamBaseT, PreferencesT>& os,
     const std::tuple<Args...>&                 t) {
-  os << os.pref.tuple_fmt.lb;
+  os << os.preferences().tuple_fmt.lb;
   internal::tuple_printer<basic_ostream<OstreamBaseT, PreferencesT>,
                           std::tuple<Args...>,
                           sizeof...(Args)>::print(os, t);
-  os << os.pref.tuple_fmt.rb;
+  os << os.preferences().tuple_fmt.rb;
   return os;
 }
 
@@ -538,22 +540,23 @@ template <typename OstreamBaseT,
           std::size_t N>
 basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
     basic_ostream<OstreamBaseT, PreferencesT>& os, const std::array<T, N>& c) {
-  return internal::output_all(os, c.cbegin(), c.cend(), os.pref.array_fmt);
+  return internal::output_all(
+      os, c.cbegin(), c.cend(), os.preferences().array_fmt);
 }
 
-#define MYOSTREAM_DEFINE_OVERLOAD(container)                \
-  MYOSTREAM_DECLARE_OVERLOAD(container) {                   \
-    return internal::output_all(                            \
-        os, c.cbegin(), c.cend(), os.pref.container##_fmt); \
+#define MYOSTREAM_DEFINE_OVERLOAD(container)                         \
+  MYOSTREAM_DECLARE_OVERLOAD(container) {                            \
+    return internal::output_all(                                     \
+        os, c.cbegin(), c.cend(), os.preferences().container##_fmt); \
   }
 
-#define MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(container)         \
-  MYOSTREAM_DECLARE_OVERLOAD(container) {                    \
-    return internal::output_all(os,                          \
-                                c.cbegin(),                  \
-                                c.cend(),                    \
-                                os.pref.container##_fmt,     \
-                                os.pref.container##_kv_fmt); \
+#define MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(container)                  \
+  MYOSTREAM_DECLARE_OVERLOAD(container) {                             \
+    return internal::output_all(os,                                   \
+                                c.cbegin(),                           \
+                                c.cend(),                             \
+                                os.preferences().container##_fmt,     \
+                                os.preferences().container##_kv_fmt); \
   }
 
 MYOSTREAM_DEFINE_OVERLOAD(deque)
