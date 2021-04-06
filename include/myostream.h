@@ -133,6 +133,10 @@ static_assert(std::is_same<wostringstream,
                            basic_ostringstream_by_string<std::wstring>>::value,
               "never happen");
 
+namespace placeholder {
+struct no_init_preferences {};
+}  // namespace placeholder
+
 // output methods
 
 template <typename OstreamBaseT,
@@ -251,6 +255,13 @@ struct default_preferences {
   using format_type = internal::ternary_format<string_type>;
 
   default_preferences() { reset(); }
+
+  static const default_preferences& static_ins() {
+    static const default_preferences ins;
+    return ins;
+  }
+
+  static const default_preferences* static_ins_ptr() { return &static_ins(); }
 
   void reset() {
     // clang-format off
@@ -385,13 +396,17 @@ public:
   template <typename... Args>
   explicit basic_ostream(Args&&... args)
       : base_type(std::forward<Args>(args)...) {
-    preferences_ptr = new preferences_type;
+    preferences_ptr_ = new preferences_type;
   }
 
+  template <typename... Args>
+  explicit basic_ostream(placeholder::no_init_preferences, Args&&... args)
+      : base_type(std::forward<Args>(args)...), preferences_ptr_(nullptr) {}
+
   ~basic_ostream() {
-    if (preferences_ptr) {
-      delete preferences_ptr;
-      preferences_ptr = nullptr;
+    if (preferences_ptr_) {
+      delete preferences_ptr_;
+      preferences_ptr_ = nullptr;
     }
   }
 
@@ -427,8 +442,12 @@ public:
     return *this;
   }
 
-  preferences_type&       preferences() { return *preferences_ptr; }
-  const preferences_type& preferences() const { return *preferences_ptr; }
+  preferences_type&       preferences() { return *preferences_ptr_; }
+  const preferences_type& preferences() const { return *preferences_ptr_; }
+  preferences_type*       preferences_ptr() { return preferences_ptr_; }
+  const preferences_type* preferences_ptr() const { return preferences_ptr_; }
+  void set_preferences_ptr(preferences_type* v) { preferences_ptr_ = v; }
+  void clear_preferences_ptr() { set_preferences_ptr(nullptr); }
 
 private:
   basic_ostream& __print() { return *this; }
@@ -447,7 +466,7 @@ private:
     return *this;
   }
 
-  preferences_type* preferences_ptr;
+  preferences_type* preferences_ptr_;
 };
 
 template <typename OstreamBaseT, typename PreferencesT>
