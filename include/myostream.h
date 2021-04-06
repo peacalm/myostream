@@ -106,25 +106,44 @@ static_assert(std::is_same<std_basic_ostringstream_by_string<std::wstring>,
 template <typename StringT>
 struct default_preferences;
 
-template <typename OstreamBaseT,
-          typename PreferencesT =
-              default_preferences<string_type_by_ostream<OstreamBaseT>>>
-class basic_ostream;
+template <typename OstreamBaseT>
+using default_preferences_by_ostream_base =
+    default_preferences<string_type_by_ostream<OstreamBaseT>>;
+
+template <typename OstreamBaseT>
+using const_default_preferences_by_ostream_base = typename std::add_const<
+    default_preferences_by_ostream_base<OstreamBaseT>>::type;
 
 template <typename OstreamBaseT,
           typename PreferencesT =
-              default_preferences<string_type_by_ostream<OstreamBaseT>>>
+              default_preferences_by_ostream_base<OstreamBaseT>>
+class basic_ostream;
+
+template <typename OstreamBaseT>
+using basic_ostream_with_const_default_preferences =
+    basic_ostream<OstreamBaseT,
+                  const_default_preferences_by_ostream_base<OstreamBaseT>>;
+
+template <typename OstreamBaseT,
+          typename PreferencesT =
+              default_preferences_by_ostream_base<OstreamBaseT>>
 class basic_ostringstream;
+
+template <typename OstreamBaseT>
+using basic_ostringstream_with_const_default_preferences = basic_ostringstream<
+    OstreamBaseT,
+    const_default_preferences_by_ostream_base<OstreamBaseT>>;
 
 using ostream        = basic_ostream<std::ostream>;
 using wostream       = basic_ostream<std::wostream>;
 using ostringstream  = basic_ostringstream<std::ostringstream>;
 using wostringstream = basic_ostringstream<std::wostringstream>;
 
-template <typename StringT>
+template <typename StringT,
+          typename PreferencesT = default_preferences<StringT>>
 using basic_ostringstream_by_string =
     basic_ostringstream<std_basic_ostringstream_by_string<StringT>,
-                        default_preferences<StringT>>;
+                        PreferencesT>;
 
 static_assert(std::is_same<ostringstream,
                            basic_ostringstream_by_string<std::string>>::value,
@@ -132,6 +151,11 @@ static_assert(std::is_same<ostringstream,
 static_assert(std::is_same<wostringstream,
                            basic_ostringstream_by_string<std::wstring>>::value,
               "never happen");
+
+namespace placeholder {
+struct no_init_preferences {};
+struct with_preferences_ptr {};
+}  // namespace placeholder
 
 // output methods
 
@@ -252,6 +276,13 @@ struct default_preferences {
 
   default_preferences() { reset(); }
 
+  static const default_preferences& static_ins() {
+    static const default_preferences ins;
+    return ins;
+  }
+
+  static const default_preferences* static_ins_ptr() { return &static_ins(); }
+
   void reset() {
     // clang-format off
                      pair_fmt.with({'('}, {',', ' '}, {')'});
@@ -350,7 +381,7 @@ template <typename OstreamT, typename TupleT, size_t N>
 struct tuple_printer {
   static void print(OstreamT& os, const TupleT& t) {
     tuple_printer<OstreamT, TupleT, N - 1>::print(os, t);
-    os << os.pref.tuple_fmt.sep;
+    os << os.preferences().tuple_fmt.sep;
     os << std::get<N - 1>(t);
   }
 };
@@ -384,13 +415,26 @@ public:
 
   template <typename... Args>
   explicit basic_ostream(Args&&... args)
-      : base_type(std::forward<Args>(args)...) {}
+      : base_type(std::forward<Args>(args)...) {
+    preferences_ptr_ = new preferences_type;
+  }
+
+  template <typename... Args>
+  explicit basic_ostream(placeholder::no_init_preferences, Args&&... args)
+      : base_type(std::forward<Args>(args)...), preferences_ptr_(nullptr) {}
+
+  ~basic_ostream() {
+    if (preferences_ptr_) {
+      delete preferences_ptr_;
+      preferences_ptr_ = nullptr;
+    }
+  }
 
   template <typename... Args>
   basic_ostream& print(const Args&... args) {
-    *this << pref.print_fmt.lb;
+    *this << preferences().print_fmt.lb;
     __print(args...);
-    *this << pref.print_fmt.rb;
+    *this << preferences().print_fmt.rb;
     return *this;
   }
 
@@ -402,7 +446,7 @@ public:
 
   template <typename Iterator>
   basic_ostream& print_range(Iterator begin, Iterator end) {
-    return print_range(begin, end, pref.print_range_fmt);
+    return print_range(begin, end, preferences().print_range_fmt);
   }
 
   template <typename Iterator>
@@ -418,17 +462,12 @@ public:
     return *this;
   }
 
-  basic_ostream& with_pref(const preferences_type& p) {
-    pref = p;
-    return *this;
-  }
-
-  basic_ostream& with_pref(preferences_type&& p) {
-    pref = std::move(p);
-    return *this;
-  }
-
-  preferences_type pref;
+  preferences_type&       preferences() { return *preferences_ptr_; }
+  const preferences_type& preferences() const { return *preferences_ptr_; }
+  preferences_type*       preferences_ptr() { return preferences_ptr_; }
+  const preferences_type* preferences_ptr() const { return preferences_ptr_; }
+  void set_preferences_ptr(preferences_type* v) { preferences_ptr_ = v; }
+  void clear_preferences_ptr() { set_preferences_ptr(nullptr); }
 
 private:
   basic_ostream& __print() { return *this; }
@@ -442,10 +481,12 @@ private:
   template <typename T, typename... Args>
   basic_ostream& __print(const T& t, const Args&... args) {
     *this << t;
-    *this << pref.print_fmt.sep;
+    *this << preferences().print_fmt.sep;
     __print(args...);
     return *this;
   }
+
+  preferences_type* preferences_ptr_;
 };
 
 template <typename OstreamBaseT, typename PreferencesT>
@@ -470,6 +511,14 @@ public:
   template <typename... Args>
   basic_ostringstream(Args&&... args)
       : base_type(std::forward<Args>(args)...) {}
+
+  template <typename... Args>
+  explicit basic_ostringstream(placeholder::with_preferences_ptr,
+                               preferences_type* pref_ptr,
+                               Args&&... args)
+      : base_type(std::forward<Args>(args)...) {
+    base_type::set_preferences_ptr(pref_ptr);
+  }
 
   template <typename... Args>
   string_vector_type to_string_vector(const Args&... args) {
@@ -504,19 +553,19 @@ template <typename OstreamBaseT,
 basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
     basic_ostream<OstreamBaseT, PreferencesT>& os,
     const std::pair<FirstT, SecondT>&          p) {
-  os << os.pref.pair_fmt.lb;
+  os << os.preferences().pair_fmt.lb;
   os << p.first;
-  os << os.pref.pair_fmt.sep;
+  os << os.preferences().pair_fmt.sep;
   os << p.second;
-  os << os.pref.pair_fmt.rb;
+  os << os.preferences().pair_fmt.rb;
   return os;
 }
 
 template <typename OstreamBaseT, typename PreferencesT>
 basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
     basic_ostream<OstreamBaseT, PreferencesT>& os, const std::tuple<>& t) {
-  os << os.pref.tuple_fmt.lb;
-  os << os.pref.tuple_fmt.rb;
+  os << os.preferences().tuple_fmt.lb;
+  os << os.preferences().tuple_fmt.rb;
   return os;
 }
 
@@ -524,11 +573,11 @@ template <typename OstreamBaseT, typename PreferencesT, typename... Args>
 basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
     basic_ostream<OstreamBaseT, PreferencesT>& os,
     const std::tuple<Args...>&                 t) {
-  os << os.pref.tuple_fmt.lb;
+  os << os.preferences().tuple_fmt.lb;
   internal::tuple_printer<basic_ostream<OstreamBaseT, PreferencesT>,
                           std::tuple<Args...>,
                           sizeof...(Args)>::print(os, t);
-  os << os.pref.tuple_fmt.rb;
+  os << os.preferences().tuple_fmt.rb;
   return os;
 }
 
@@ -538,22 +587,23 @@ template <typename OstreamBaseT,
           std::size_t N>
 basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
     basic_ostream<OstreamBaseT, PreferencesT>& os, const std::array<T, N>& c) {
-  return internal::output_all(os, c.cbegin(), c.cend(), os.pref.array_fmt);
+  return internal::output_all(
+      os, c.cbegin(), c.cend(), os.preferences().array_fmt);
 }
 
-#define MYOSTREAM_DEFINE_OVERLOAD(container)                \
-  MYOSTREAM_DECLARE_OVERLOAD(container) {                   \
-    return internal::output_all(                            \
-        os, c.cbegin(), c.cend(), os.pref.container##_fmt); \
+#define MYOSTREAM_DEFINE_OVERLOAD(container)                         \
+  MYOSTREAM_DECLARE_OVERLOAD(container) {                            \
+    return internal::output_all(                                     \
+        os, c.cbegin(), c.cend(), os.preferences().container##_fmt); \
   }
 
-#define MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(container)         \
-  MYOSTREAM_DECLARE_OVERLOAD(container) {                    \
-    return internal::output_all(os,                          \
-                                c.cbegin(),                  \
-                                c.cend(),                    \
-                                os.pref.container##_fmt,     \
-                                os.pref.container##_kv_fmt); \
+#define MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(container)                  \
+  MYOSTREAM_DECLARE_OVERLOAD(container) {                             \
+    return internal::output_all(os,                                   \
+                                c.cbegin(),                           \
+                                c.cend(),                             \
+                                os.preferences().container##_fmt,     \
+                                os.preferences().container##_kv_fmt); \
   }
 
 MYOSTREAM_DEFINE_OVERLOAD(deque)
@@ -578,24 +628,32 @@ MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(unordered_multimap)
 
 template <typename... Args>
 std::string tostr(const Args&... args) {
-  ostringstream o;
-  o.print(args...);
-  return o.str();
+  using oss_t =
+      basic_ostringstream_with_const_default_preferences<std::ostringstream>;
+  oss_t oss(placeholder::with_preferences_ptr{},
+            oss_t::preferences_type::static_ins_ptr());
+  oss.print(args...);
+  oss.clear_preferences_ptr();
+  return oss.str();
 }
 
 template <typename... Args>
 std::wstring towstr(const Args&... args) {
-  wostringstream o;
-  o.print(args...);
-  return o.str();
+  using oss_t =
+      basic_ostringstream_with_const_default_preferences<std::wostringstream>;
+  oss_t oss(placeholder::with_preferences_ptr{},
+            oss_t::preferences_type::static_ins_ptr());
+  oss.print(args...);
+  oss.clear_preferences_ptr();
+  return oss.str();
 }
 
-template <typename OstringstreamT>
-inline std::vector<typename OstringstreamT::string_type>
-split_macro_param_names(const std::string& s) {
-  using str_t = typename OstringstreamT::string_type;
-  std::vector<str_t> ret;
-  OstringstreamT     oss;
+template <typename ResultStringT>
+inline std::vector<ResultStringT> split_macro_param_names(
+    const std::string& s) {
+  using str_t = ResultStringT;
+  std_basic_ostringstream_by_string<str_t> oss;
+  std::vector<str_t>                       ret;
   for (size_t i = 0, n = s.size(); i < n; ++i) {
     bool found_bracket = false;
     for (const auto& p : {"()", "<>", "{}", "[]"}) {
@@ -633,9 +691,8 @@ inline OstringstreamT&& watch_to_ostringstream(OstringstreamT&&   oss,
                                                const FinalDelimT& final_delim,
                                                const std::string& var_names,
                                                const Args&... args) {
-  auto names =
-      split_macro_param_names<typename std::decay<OstringstreamT>::type>(
-          var_names);
+  auto names = split_macro_param_names<
+      typename std::decay<OstringstreamT>::type::string_type>(var_names);
   auto values = oss.to_string_vector(args...);
   assert(names.size() == values.size());
   for (size_t i = 0; i < names.size(); ++i) {
@@ -648,20 +705,25 @@ inline OstringstreamT&& watch_to_ostringstream(OstringstreamT&&   oss,
   return oss;
 }
 
-template <typename OstringstreamT,
+template <typename ResultStringT,
           typename KvSepT,
           typename ParamSepT,
           typename FinalDelimT,
           typename... Args>
-inline typename OstringstreamT::string_type watch_to_string(
-    const KvSepT&      kv_sep,
-    const ParamSepT&   param_sep,
-    const FinalDelimT& final_delim,
-    const std::string& var_names,
-    const Args&... args) {
-  OstringstreamT oss;
+inline ResultStringT watch_to_string(const KvSepT&      kv_sep,
+                                     const ParamSepT&   param_sep,
+                                     const FinalDelimT& final_delim,
+                                     const std::string& var_names,
+                                     const Args&... args) {
+  using string_type = ResultStringT;
+  using oss_t =
+      basic_ostringstream_by_string<string_type,
+                                    const default_preferences<string_type>>;
+  oss_t oss(placeholder::with_preferences_ptr{},
+            oss_t::preferences_type::static_ins_ptr());
   watch_to_ostringstream(
       oss, kv_sep, param_sep, final_delim, var_names, args...);
+  oss.clear_preferences_ptr();
   return oss.str();
 }
 
@@ -674,27 +736,22 @@ inline typename OstringstreamT::string_type watch_to_string(
                          #__VA_ARGS__,                    \
                          __VA_ARGS__)
 
-#define MYOSTREAM_WATCH_TO_STRING(                            \
-    string_type, kv_sep, param_sep, final_delim, ...)         \
-  myostream::watch_to_string<                                 \
-      myostream::basic_ostringstream_by_string<string_type>>( \
+#define MYOSTREAM_WATCH_TO_STRING(                    \
+    string_type, kv_sep, param_sep, final_delim, ...) \
+  myostream::watch_to_string<string_type>(            \
       kv_sep, param_sep, final_delim, #__VA_ARGS__, __VA_ARGS__)
 
-#define MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...)    \
-  do {                                                                      \
-    using oss_t = myostream::basic_ostringstream_by_string<decltype(        \
-        out_stream)::string_type>;                                          \
-    oss_t oss;                                                              \
-    auto  names  = myostream::split_macro_param_names<oss_t>(#__VA_ARGS__); \
-    auto  values = oss.to_string_vector(__VA_ARGS__);                       \
-    assert(names.size() == values.size());                                  \
-    for (size_t i = 0; i < names.size(); ++i) {                             \
-      if (i > 0) out_stream << param_sep;                                   \
-      out_stream << names[i];                                               \
-      out_stream << kv_sep;                                                 \
-      out_stream << values[i];                                              \
-    }                                                                       \
-    out_stream << final_delim;                                              \
+#define MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...) \
+  do {                                                                   \
+    using oss_t = myostream::basic_ostringstream_by_string<              \
+        decltype(out_stream)::string_type,                               \
+        decltype(out_stream)::preferences_type>;                         \
+    oss_t oss(myostream::placeholder::with_preferences_ptr{},            \
+              out_stream.preferences_ptr());                             \
+    MYOSTREAM_WATCH_TO_OSTRINGSTREAM(                                    \
+        oss, kv_sep, param_sep, final_delim, __VA_ARGS__);               \
+    out_stream << oss.str();                                             \
+    oss.clear_preferences_ptr();                                         \
   } while (0)
 
 }  // namespace myostream
