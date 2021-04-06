@@ -165,7 +165,6 @@ i = 123
 si = {1, 2, 3}
 std::set<int>{1,2,3} = {1, 2, 3}
 "strings" = strings
-
 ```
 
 ### Macro: MYOSTREAM_WATCH_TO_OSTRINGSTREAM(out_stringtream, kv_sep, param_sep, final_delim, ...)
