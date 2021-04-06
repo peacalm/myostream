@@ -160,8 +160,8 @@ std::set<int>{1,2,3} = {1, 2, 3}
 ```
 
 ### Macro: MYOSTREAM_WATCH_TO_OSTRINGSTREAM(out_stringtream, kv_sep, param_sep, final_delim, ...)
-Like `MYOSTREAM_WATCH`, but the given first parameter should be a stringtream 
-type. If you exactly have stringstream, the use this will get a better 
+Like `MYOSTREAM_WATCH`, but the given first parameter must be a stringtream 
+type. If you exactly have stringstream, then use this will get a better 
 performance than `MYOSTREAM_WATCH`.
 
 ### Macro: MYOSTREAM_WATCH_TO_STRING(string_type, kv_sep, param_sep, final_delim, ...)
