@@ -139,10 +139,11 @@ using wostream       = basic_ostream<std::wostream>;
 using ostringstream  = basic_ostringstream<std::ostringstream>;
 using wostringstream = basic_ostringstream<std::wostringstream>;
 
-template <typename StringT>
+template <typename StringT,
+          typename PreferencesT = default_preferences<StringT>>
 using basic_ostringstream_by_string =
     basic_ostringstream<std_basic_ostringstream_by_string<StringT>,
-                        default_preferences<StringT>>;
+                        PreferencesT>;
 
 static_assert(std::is_same<ostringstream,
                            basic_ostringstream_by_string<std::string>>::value,
@@ -153,6 +154,7 @@ static_assert(std::is_same<wostringstream,
 
 namespace placeholder {
 struct no_init_preferences {};
+struct with_preferences_ptr {};
 }  // namespace placeholder
 
 // output methods
@@ -511,6 +513,14 @@ public:
       : base_type(std::forward<Args>(args)...) {}
 
   template <typename... Args>
+  explicit basic_ostringstream(placeholder::with_preferences_ptr,
+                               preferences_type* pref_ptr,
+                               Args&&... args)
+      : base_type(std::forward<Args>(args)...) {
+    base_type::set_preferences_ptr(pref_ptr);
+  }
+
+  template <typename... Args>
   string_vector_type to_string_vector(const Args&... args) {
     auto old = ostream_base_type::str();
     clear_buf();
@@ -620,8 +630,8 @@ template <typename... Args>
 std::string tostr(const Args&... args) {
   using type =
       basic_ostringstream_with_const_default_preferences<std::ostringstream>;
-  type o(placeholder::no_init_preferences{});
-  o.set_preferences_ptr(type::preferences_type::static_ins_ptr());
+  type o(placeholder::with_preferences_ptr{},
+         type::preferences_type::static_ins_ptr());
   o.print(args...);
   o.clear_preferences_ptr();
   return o.str();
@@ -631,8 +641,8 @@ template <typename... Args>
 std::wstring towstr(const Args&... args) {
   using type =
       basic_ostringstream_with_const_default_preferences<std::wostringstream>;
-  type o(placeholder::no_init_preferences{});
-  o.set_preferences_ptr(type::preferences_type::static_ins_ptr());
+  type o(placeholder::with_preferences_ptr{},
+         type::preferences_type::static_ins_ptr());
   o.print(args...);
   o.clear_preferences_ptr();
   return o.str();
@@ -730,9 +740,11 @@ inline typename OstringstreamT::string_type watch_to_string(
 
 #define MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...)    \
   do {                                                                      \
-    using oss_t = myostream::basic_ostringstream_by_string<decltype(        \
-        out_stream)::string_type>;                                          \
-    oss_t oss;                                                              \
+    using oss_t = myostream::basic_ostringstream_by_string<                 \
+        decltype(out_stream)::string_type,                                  \
+        decltype(out_stream)::preferences_type>;                            \
+    oss_t oss(myostream::placeholder::with_preferences_ptr{},               \
+              out_stream.preferences_ptr());                                \
     auto  names  = myostream::split_macro_param_names<oss_t>(#__VA_ARGS__); \
     auto  values = oss.to_string_vector(__VA_ARGS__);                       \
     assert(names.size() == values.size());                                  \
@@ -743,6 +755,7 @@ inline typename OstringstreamT::string_type watch_to_string(
       out_stream << values[i];                                              \
     }                                                                       \
     out_stream << final_delim;                                              \
+    oss.clear_preferences_ptr();                                            \
   } while (0)
 
 }  // namespace myostream
