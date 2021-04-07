@@ -2,8 +2,6 @@
 
 #include <gtest/gtest.h>
 
-#include <iostream>
-
 #include "myostream.h"
 
 extern myostream::ostream  mycout;
