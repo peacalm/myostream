@@ -4,9 +4,9 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 find_package(GTest REQUIRED)
-IF(NOT GTEST_FOUND)
+if(NOT GTEST_FOUND)
     message(FATAL_ERROR "GTest not found! Please install GTest first.")
-ENDIF()
+endif()
 
 enable_testing()
 
