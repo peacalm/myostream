@@ -62,6 +62,13 @@ TEST(Tostr, Complex) {
   myostream::ostringstream oss;
   EXPECT_TRUE(oss.print_range(mis.begin(), mis.end()).str() ==
               "(1, {1, 11}), (2, {2, 22})");
+
+  oss.clear_buf();
+  EXPECT_TRUE(oss.print(vs[0]).str() == "{1, 2}");
+
+  oss.clear_buf();
+  mis[1].insert(111);
+  EXPECT_TRUE(oss.println(*mis.begin()).str() == "(1, {1, 11, 111})\n");
 }
 
 TEST(Watch, Complex) {
