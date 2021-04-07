@@ -586,20 +586,20 @@ template <typename OstreamBaseT,
 basic_ostream<OstreamBaseT, PreferencesT>& operator<<(
     basic_ostream<OstreamBaseT, PreferencesT>& os, const std::array<T, N>& c) {
   return internal::output_all(
-      os, c.cbegin(), c.cend(), os.preferences().array_fmt);
+      os, c.begin(), c.end(), os.preferences().array_fmt);
 }
 
-#define MYOSTREAM_DEFINE_OVERLOAD(container)                         \
-  MYOSTREAM_DECLARE_OVERLOAD(container) {                            \
-    return internal::output_all(                                     \
-        os, c.cbegin(), c.cend(), os.preferences().container##_fmt); \
+#define MYOSTREAM_DEFINE_OVERLOAD(container)                       \
+  MYOSTREAM_DECLARE_OVERLOAD(container) {                          \
+    return internal::output_all(                                   \
+        os, c.begin(), c.end(), os.preferences().container##_fmt); \
   }
 
 #define MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(container)                  \
   MYOSTREAM_DECLARE_OVERLOAD(container) {                             \
     return internal::output_all(os,                                   \
-                                c.cbegin(),                           \
-                                c.cend(),                             \
+                                c.begin(),                            \
+                                c.end(),                              \
                                 os.preferences().container##_fmt,     \
                                 os.preferences().container##_kv_fmt); \
   }
