@@ -741,15 +741,15 @@ inline ResultStringT watch_to_string(const KvSepT&      kv_sep,
 
 #define MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...) \
   do {                                                                   \
-    using oss_t = myostream::basic_ostringstream_by_string<              \
+    using __oss_t__ = myostream::basic_ostringstream_by_string<          \
         decltype(out_stream)::string_type,                               \
         decltype(out_stream)::preferences_type>;                         \
-    oss_t oss(myostream::placeholder::with_preferences_ptr{},            \
-              out_stream.preferences_ptr());                             \
+    __oss_t__ __oss__(myostream::placeholder::with_preferences_ptr{},    \
+                      out_stream.preferences_ptr());                     \
     MYOSTREAM_WATCH_TO_OSTRINGSTREAM(                                    \
-        oss, kv_sep, param_sep, final_delim, __VA_ARGS__);               \
-    out_stream << oss.str();                                             \
-    oss.clear_preferences_ptr();                                         \
+        __oss__, kv_sep, param_sep, final_delim, __VA_ARGS__);           \
+    out_stream << __oss__.str();                                         \
+    __oss__.clear_preferences_ptr();                                     \
   } while (0)
 
 }  // namespace myostream
