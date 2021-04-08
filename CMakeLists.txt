@@ -10,5 +10,6 @@ install(FILES "include/myostream.h" DESTINATION include)
 
 option(BUILD_TEST "Build test." FALSE)
 if (BUILD_TEST)
+  enable_testing()
   add_subdirectory(test)
 endif()

@@ -8,15 +8,13 @@ if (NOT GTEST_FOUND)
     message(FATAL_ERROR "GTest not found! Please install GTest first.")
 endif()
 
-enable_testing()
-
 file(GLOB SOURCE_FILES "*.cpp")
-add_executable(test ${SOURCE_FILES})
+add_executable(myostream_test ${SOURCE_FILES})
 
-target_include_directories(test PUBLIC
+target_include_directories(myostream_test PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/
         ${CMAKE_CURRENT_SOURCE_DIR}/../include)
-target_include_directories(test PUBLIC ${GTEST_INCLUDE_DIR})
-target_link_libraries(test PUBLIC ${GTEST_LIBRARIES})
+target_include_directories(myostream_test PUBLIC ${GTEST_INCLUDE_DIR})
+target_link_libraries(myostream_test PUBLIC ${GTEST_LIBRARIES})
 
-add_test(NAME test COMMAND test)
+add_test(NAME myostream_test COMMAND myostream_test)
