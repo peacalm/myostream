@@ -211,7 +211,7 @@ Then happy coding with `#include <myostream.h>`.
 First, you need to install [GoogleTest](https://github.com/google/googletest).
 Then enter the "build" directory like above, run:
 ```shell script
-# now at directory myostream/build, then run:
+# suppose now at directory myostream/build, then run:
 cmake .. -DBUILD_TEST=TRUE
 make
 make test  # or ctest
