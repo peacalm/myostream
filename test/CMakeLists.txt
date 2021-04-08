@@ -9,12 +9,12 @@ if (NOT GTEST_FOUND)
 endif()
 
 file(GLOB SOURCE_FILES "*.cpp")
-add_executable(myostream_test ${SOURCE_FILES})
+add_executable(test_myostream ${SOURCE_FILES})
 
-target_include_directories(myostream_test PUBLIC
+target_include_directories(test_myostream PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/
         ${CMAKE_CURRENT_SOURCE_DIR}/../include)
-target_include_directories(myostream_test PUBLIC ${GTEST_INCLUDE_DIR})
-target_link_libraries(myostream_test PUBLIC ${GTEST_LIBRARIES})
+target_include_directories(test_myostream PUBLIC ${GTEST_INCLUDE_DIR})
+target_link_libraries(test_myostream PUBLIC ${GTEST_LIBRARIES})
 
-add_test(NAME myostream_test COMMAND myostream_test)
+add_test(NAME test_myostream COMMAND test_myostream)
