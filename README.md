@@ -1,6 +1,7 @@
 # Extension for std::basic_ostream in C++
-This lib supports convenient output for all item-iterable container types, and 
-their composited types.
+This lib supports convenient output for all item-iterable container types and 
+their composited types, and supports mutable preferences which specify the 
+output format.
 
 * C++ standard requirement: >= C++11
 
