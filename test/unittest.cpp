@@ -93,11 +93,11 @@ TEST(Watch, Complex) {
         std::map<int, std::set<int>>{{1, {1, 11}}, {2, {2, 22}}});
   watch(vs, mis);
 
-  EXPECT_TRUE(MYOSTREAM_WATCH_TO_STRING(std::string, ":", ";", ";", vs, mis) ==
-              "vs:[{1, 2}, {3, 4}];mis:{1: {1, 11}, 2: {2, 22}};");
+  EXPECT_TRUE(MYOSTREAM_WATCH_TO_STRING(std::string, "=", ", ", "", vs, mis) ==
+              "vs=[{1, 2}, {3, 4}], mis={1: {1, 11}, 2: {2, 22}}");
 
   myostream::ostringstream oss;
   EXPECT_TRUE(
-      MYOSTREAM_WATCH_TO_OSTRINGSTREAM(oss, ":", ";", ";", vs, mis).str() ==
-      "vs:[{1, 2}, {3, 4}];mis:{1: {1, 11}, 2: {2, 22}};");
+      MYOSTREAM_WATCH_TO_OSTRINGSTREAM(oss, ": ", "; ", ";", vs, mis).str() ==
+      "vs: [{1, 2}, {3, 4}]; mis: {1: {1, 11}, 2: {2, 22}};");
 }
