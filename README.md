@@ -197,7 +197,7 @@ si = {1, 2, 3}
 
 ## Install
 Install the lib to your computer:  
-```bash
+```shell script
 git clone https://github.com/TheLonelyHeracles/myostream.git
 cd myostream
 mkdir build
@@ -207,3 +207,10 @@ make install
 ```
 Then happy coding with `#include <myostream.h>`.
 
+## Test
+Enter the "build" directory like above, then run:
+```shell script
+cmake .. -DBUILD_TEST=TRUE
+make
+make test  # or ctest
+```
