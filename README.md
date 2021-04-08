@@ -208,7 +208,7 @@ make install
 Then happy coding with `#include <myostream.h>`.
 
 ## Test
-First, you need to install ![GoogleTest](https://github.com/google/googletest).
+First, you need to install [GoogleTest](https://github.com/google/googletest).
 The enter the "build" directory like above, then run:
 ```shell script
 cmake .. -DBUILD_TEST=TRUE
