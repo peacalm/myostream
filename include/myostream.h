@@ -65,12 +65,15 @@ MYOSTREAM_DEFINE_TYPE_TRAITS(traits_type);
 MYOSTREAM_DEFINE_TYPE_TRAITS(allocator_type);
 #undef MYOSTREAM_DEFINE_TYPE_TRAITS
 
-template <typename OstreamT, typename CharT = typename OstreamT::char_type>
+template <typename OstreamT>
 using string_type_by_ostream = get_string_type_t<
     OstreamT,
-    std::basic_string<CharT,
-                      get_traits_type_t<OstreamT, std::char_traits<CharT>>,
-                      get_allocator_type_t<OstreamT, std::allocator<CharT>>>>;
+    std::basic_string<
+        typename OstreamT::char_type,
+        get_traits_type_t<OstreamT,
+                          std::char_traits<typename OstreamT::char_type>>,
+        get_allocator_type_t<OstreamT,
+                             std::allocator<typename OstreamT::char_type>>>>;
 
 template <typename StringT>
 using std_basic_ostringstream_by_string =
