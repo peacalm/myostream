@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(MyOStream
-        VERSION 2.2
+        VERSION 2.3
         DESCRIPTION "MyOStream header-only lib.")
 
 set(CMAKE_CXX_STANDARD 11)
