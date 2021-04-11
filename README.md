@@ -1,4 +1,4 @@
-# MyOstream: Extension for std::basic_ostream in C++
+# MyOStream: Extension for std::basic_ostream in C++
 This lib supports convenient output for all item-iterable container types and 
 their composited types, and supports mutable preferences which specify the 
 output format.
