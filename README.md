@@ -93,11 +93,11 @@ The class `basic_ostringstream` is derived from `basic_ostream` by public, so
 it has all member functions of the latter as mentioned above. Moreover, the 
 former has unique member functions:
 ```c++
-/// print args into a std::vector<string_type>
+// print args into a std::vector<string_type>
 template <typename... Args>
 string_vector_type to_string_vector(const Args&... args);
 
-/// clear the string buffer which stores all outputs beforehand
+// clear the string buffer which stores all outputs beforehand
 void clear_buf();
 ```
 
