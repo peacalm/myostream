@@ -277,12 +277,13 @@ struct default_preferences {
 
   default_preferences() { reset(); }
 
-  static const default_preferences& static_ins() {
-    static const default_preferences ins;
-    return ins;
+  static default_preferences& ins() {
+    static default_preferences i;
+    return i;
   }
-
-  static const default_preferences* static_ins_ptr() { return &static_ins(); }
+  static default_preferences*       ins_ptr() { return &ins(); }
+  static const default_preferences& cins() { return ins(); }
+  static const default_preferences* cins_ptr() { return &cins(); }
 
   void reset() {
     // clang-format off
@@ -632,7 +633,7 @@ std::string tostr(const Args&... args) {
   using oss_t =
       basic_ostringstream_with_const_default_preferences<std::ostringstream>;
   oss_t oss(placeholder::with_preferences_ptr{},
-            oss_t::preferences_type::static_ins_ptr());
+            oss_t::preferences_type::cins_ptr());
   oss.print(args...);
   oss.clear_preferences_ptr();
   return oss.str();
@@ -643,7 +644,7 @@ std::wstring towstr(const Args&... args) {
   using oss_t =
       basic_ostringstream_with_const_default_preferences<std::wostringstream>;
   oss_t oss(placeholder::with_preferences_ptr{},
-            oss_t::preferences_type::static_ins_ptr());
+            oss_t::preferences_type::cins_ptr());
   oss.print(args...);
   oss.clear_preferences_ptr();
   return oss.str();
@@ -721,7 +722,7 @@ inline ResultStringT watch_to_string(const KvSepT&      kv_sep,
       basic_ostringstream_by_string<string_type,
                                     const default_preferences<string_type>>;
   oss_t oss(placeholder::with_preferences_ptr{},
-            oss_t::preferences_type::static_ins_ptr());
+            oss_t::preferences_type::cins_ptr());
   watch_to_ostringstream(
       oss, kv_sep, param_sep, final_delim, var_names, args...);
   oss.clear_preferences_ptr();
