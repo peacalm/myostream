@@ -650,6 +650,8 @@ std::wstring towstr(const Args&... args) {
   return oss.str();
 }
 
+// ==================== watch ====================
+
 template <typename ResultStringT>
 inline std::vector<ResultStringT> split_macro_param_names(
     const std::string& s) {
@@ -682,28 +684,74 @@ inline std::vector<ResultStringT> split_macro_param_names(
   return ret;
 }
 
-template <typename OstringstreamT,
+template <typename OstreamT,
+          typename KvSepT,
+          typename ParamSepT,
+          typename FinalDelimT,
+          typename StringVectorT,
+          typename FinalArgT>
+inline OstreamT&& watch_to_ostream_aux(OstreamT&&           oss,
+                                       const KvSepT&        kv_sep,
+                                       const ParamSepT&     param_sep,
+                                       const FinalDelimT&   final_delim,
+                                       const StringVectorT& var_names,
+                                       size_t               cur_idx,
+                                       const FinalArgT&     final_arg) {
+  assert(cur_idx == var_names.size() - 1);
+  oss << var_names[cur_idx];
+  oss << kv_sep;
+  oss << final_arg;
+  oss << final_delim;
+  return oss;
+}
+
+template <typename OstreamT,
+          typename KvSepT,
+          typename ParamSepT,
+          typename FinalDelimT,
+          typename StringVectorT,
+          typename FirstArgT,
+          typename... Args>
+inline OstreamT&& watch_to_ostream_aux(OstreamT&&           oss,
+                                       const KvSepT&        kv_sep,
+                                       const ParamSepT&     param_sep,
+                                       const FinalDelimT&   final_delim,
+                                       const StringVectorT& var_names,
+                                       size_t               cur_idx,
+                                       const FirstArgT&     first_arg,
+                                       const Args&... other_args) {
+  assert(cur_idx < var_names.size());
+  oss << var_names[cur_idx];
+  oss << kv_sep;
+  oss << first_arg;
+  oss << param_sep;
+  watch_to_ostream_aux(oss,
+                       kv_sep,
+                       param_sep,
+                       final_delim,
+                       var_names,
+                       cur_idx + 1,
+                       other_args...);
+  return oss;
+}
+
+template <typename OstreamT,
           typename KvSepT,
           typename ParamSepT,
           typename FinalDelimT,
           typename... Args>
-inline OstringstreamT&& watch_to_ostringstream(OstringstreamT&&   oss,
-                                               const KvSepT&      kv_sep,
-                                               const ParamSepT&   param_sep,
-                                               const FinalDelimT& final_delim,
-                                               const std::string& var_names,
-                                               const Args&... args) {
-  auto names = split_macro_param_names<
-      typename std::decay<OstringstreamT>::type::string_type>(var_names);
-  auto values = oss.to_string_vector(args...);
-  assert(names.size() == values.size());
-  for (size_t i = 0; i < names.size(); ++i) {
-    if (i > 0) oss << param_sep;
-    oss << names[i];
-    oss << kv_sep;
-    oss << values[i];
-  }
-  oss << final_delim;
+inline OstreamT&& watch_to_ostream(OstreamT&&         oss,
+                                   const KvSepT&      kv_sep,
+                                   const ParamSepT&   param_sep,
+                                   const FinalDelimT& final_delim,
+                                   const std::string& vars_name_line,
+                                   const Args&... args) {
+  auto names =
+      split_macro_param_names<typename std::decay<OstreamT>::type::string_type>(
+          vars_name_line);
+  assert(names.size() == sizeof...(Args));
+  if (names.empty()) return oss;
+  watch_to_ostream_aux(oss, kv_sep, param_sep, final_delim, names, 0, args...);
   return oss;
 }
 
@@ -715,7 +763,7 @@ template <typename ResultStringT,
 inline ResultStringT watch_to_string(const KvSepT&      kv_sep,
                                      const ParamSepT&   param_sep,
                                      const FinalDelimT& final_delim,
-                                     const std::string& var_names,
+                                     const std::string& vars_name_line,
                                      const Args&... args) {
   using string_type = ResultStringT;
   using oss_t =
@@ -723,37 +771,19 @@ inline ResultStringT watch_to_string(const KvSepT&      kv_sep,
                                     const default_preferences<string_type>>;
   oss_t oss(placeholder::with_preferences_ptr{},
             oss_t::preferences_type::cins_ptr());
-  watch_to_ostringstream(
-      oss, kv_sep, param_sep, final_delim, var_names, args...);
+  watch_to_ostream(
+      oss, kv_sep, param_sep, final_delim, vars_name_line, args...);
   oss.clear_preferences_ptr();
   return oss.str();
 }
 
-#define MYOSTREAM_WATCH_TO_OSTRINGSTREAM(                 \
-    out_stringtream, kv_sep, param_sep, final_delim, ...) \
-  myostream::watch_to_ostringstream(out_stringtream,      \
-                                    kv_sep,               \
-                                    param_sep,            \
-                                    final_delim,          \
-                                    #__VA_ARGS__,         \
-                                    __VA_ARGS__)
+#define MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...) \
+  myostream::watch_to_ostream(                                           \
+      out_stream, kv_sep, param_sep, final_delim, #__VA_ARGS__, __VA_ARGS__)
 
 #define MYOSTREAM_WATCH_TO_STRING(                    \
     string_type, kv_sep, param_sep, final_delim, ...) \
   myostream::watch_to_string<string_type>(            \
       kv_sep, param_sep, final_delim, #__VA_ARGS__, __VA_ARGS__)
-
-#define MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...) \
-  do {                                                                   \
-    using __oss_t__ = myostream::basic_ostringstream_by_string<          \
-        decltype(out_stream)::string_type,                               \
-        decltype(out_stream)::preferences_type>;                         \
-    __oss_t__ __oss__(myostream::placeholder::with_preferences_ptr{},    \
-                      out_stream.preferences_ptr());                     \
-    MYOSTREAM_WATCH_TO_OSTRINGSTREAM(                                    \
-        __oss__, kv_sep, param_sep, final_delim, __VA_ARGS__);           \
-    out_stream << __oss__.str();                                         \
-    __oss__.clear_preferences_ptr();                                     \
-  } while (0)
 
 }  // namespace myostream

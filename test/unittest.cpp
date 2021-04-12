@@ -97,7 +97,6 @@ TEST(Watch, Complex) {
               "vs=[{1, 2}, {3, 4}], mis={1: {1, 11}, 2: {2, 22}}");
 
   myostream::ostringstream oss;
-  EXPECT_TRUE(
-      MYOSTREAM_WATCH_TO_OSTRINGSTREAM(oss, ": ", "; ", ";", vs, mis).str() ==
-      "vs: [{1, 2}, {3, 4}]; mis: {1: {1, 11}, 2: {2, 22}};");
+  EXPECT_TRUE(MYOSTREAM_WATCH(oss, ": ", "; ", ";", vs, mis).str() ==
+              "vs: [{1, 2}, {3, 4}]; mis: {1: {1, 11}, 2: {2, 22}};");
 }
