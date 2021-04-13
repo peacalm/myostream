@@ -33,6 +33,10 @@
 
 namespace myostream {
 
+#ifndef MYOSTREAM_PREFERENCES_RESET
+#define MYOSTREAM_PREFERENCES_RESET reset_default
+#endif
+
 // type traits
 
 // std::void_t since C++17, but here C++11 as minimum requirement.
@@ -285,7 +289,9 @@ struct default_preferences {
   static const default_preferences& cins() { return ins(); }
   static const default_preferences* cins_ptr() { return &cins(); }
 
-  void reset() {
+  void reset() { MYOSTREAM_PREFERENCES_RESET(); }
+
+  void reset_default() {
     // clang-format off
                      pair_fmt.with({'('}, {',', ' '}, {')'});
                     tuple_fmt.with({'<'}, {',', ' '}, {'>'});
@@ -313,6 +319,37 @@ struct default_preferences {
 
                     print_fmt.with({   }, {',', ' '}, {   });
               print_range_fmt.with({   }, {',', ' '}, {   });
+    // clang-format on
+  }
+
+  void reset_dense() {
+    // clang-format off
+                     pair_fmt.with({'('}, {','}, {')'});
+                    tuple_fmt.with({'<'}, {','}, {'>'});
+
+                    array_fmt.with({'['}, {','}, {']'});
+                    deque_fmt.with({'['}, {','}, {']'});
+             forward_list_fmt.with({'['}, {','}, {']'});
+         initializer_list_fmt.with({'['}, {','}, {']'});
+                     list_fmt.with({'['}, {','}, {']'});
+                   vector_fmt.with({'['}, {','}, {']'});
+
+                      set_fmt.with({'{'}, {','}, {'}'});
+                 multiset_fmt.with({'{'}, {','}, {'}'});
+            unordered_set_fmt.with({'{'}, {','}, {'}'});
+       unordered_multiset_fmt.with({'{'}, {','}, {'}'});
+
+                      map_fmt.with({'{'}, {','}, {'}'});
+                   map_kv_fmt.with({   }, {':'}, {   });
+                 multimap_fmt.with({'{'}, {','}, {'}'});
+              multimap_kv_fmt.with({   }, {':'}, {   });
+            unordered_map_fmt.with({'{'}, {','}, {'}'});
+         unordered_map_kv_fmt.with({   }, {':'}, {   });
+       unordered_multimap_fmt.with({'{'}, {','}, {'}'});
+    unordered_multimap_kv_fmt.with({   }, {':'}, {   });
+
+                    print_fmt.with({   }, {','}, {   });
+              print_range_fmt.with({   }, {','}, {   });
     // clang-format on
   }
 
