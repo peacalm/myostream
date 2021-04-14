@@ -42,7 +42,7 @@ container type, or just use the default preferences.
 This class `myostream::basic_ostringstream` is derived from 
 `myostream::basic_ostream`, and has the same template parameters, a required 
 `OstreamBaseT` and an optional `PreferencesT`. But here the `OstreamBaseT` 
-should be a "stringstream type", which has a member methd `str()` to get a 
+should be a "stringstream type", which has a member method `str()` to get a 
 string representing the output result. e.g. 
 `myostream::basic_ostringstream<std::ostringstream>` is valid, but 
 `myostream::basic_ostringstream<std::ostream>` will get a compile error.
