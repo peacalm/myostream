@@ -476,19 +476,20 @@ public:
   template <typename... Args>
   explicit basic_ostream(Args&&... args)
       : base_type(std::forward<Args>(args)...) {
-    preferences_ptr_ = new preferences_type;
+    new_preferences_ptr();
   }
 
   template <typename... Args>
   explicit basic_ostream(placeholder::no_init_preferences, Args&&... args)
       : base_type(std::forward<Args>(args)...), preferences_ptr_(nullptr) {}
 
-  ~basic_ostream() {
-    if (preferences_ptr_) {
-      delete preferences_ptr_;
-      preferences_ptr_ = nullptr;
-    }
-  }
+  template <typename... Args>
+  explicit basic_ostream(placeholder::with_preferences_ptr,
+                         preferences_type* pref_ptr,
+                         Args&&... args)
+      : base_type(std::forward<Args>(args)...), preferences_ptr_(pref_ptr) {}
+
+  ~basic_ostream() { delete_preferences_ptr(); }
 
   template <typename... Args>
   basic_ostream& print(const Args&... args) {
@@ -524,9 +525,21 @@ public:
 
   preferences_type&       preferences() { return *preferences_ptr_; }
   const preferences_type& preferences() const { return *preferences_ptr_; }
+
   preferences_type*       preferences_ptr() { return preferences_ptr_; }
   const preferences_type* preferences_ptr() const { return preferences_ptr_; }
+
+  void new_preferences_ptr() { preferences_ptr_ = new preferences_type; }
+
+  void delete_preferences_ptr() {
+    if (preferences_ptr_) {
+      delete preferences_ptr_;
+      preferences_ptr_ = nullptr;
+    }
+  }
+
   void set_preferences_ptr(preferences_type* v) { preferences_ptr_ = v; }
+
   void clear_preferences_ptr() { set_preferences_ptr(nullptr); }
 
 private:
@@ -573,12 +586,15 @@ public:
       : base_type(std::forward<Args>(args)...) {}
 
   template <typename... Args>
-  explicit basic_ostringstream(placeholder::with_preferences_ptr,
-                               preferences_type* pref_ptr,
+  explicit basic_ostringstream(placeholder::no_init_preferences no_init_pref,
                                Args&&... args)
-      : base_type(std::forward<Args>(args)...) {
-    base_type::set_preferences_ptr(pref_ptr);
-  }
+      : base_type(no_init_pref, std::forward<Args>(args)...) {}
+
+  template <typename... Args>
+  explicit basic_ostringstream(placeholder::with_preferences_ptr with_pref_ptr,
+                               preferences_type*                 pref_ptr,
+                               Args&&... args)
+      : base_type(with_pref_ptr, pref_ptr, std::forward<Args>(args)...) {}
 
   template <typename... Args>
   string_vector_type to_string_vector(const Args&... args) {
