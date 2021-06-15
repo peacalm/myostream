@@ -166,6 +166,10 @@ template <typename OstreamBaseT,
               default_preferences_by_ostream_base<OstreamBaseT>>
 class basic_ostringstream;
 
+/**
+ * @brief Instantiate a `basic_ostringstream` with constant
+ * `default_preferences`.
+ */
 template <typename OstreamBaseT>
 using basic_ostringstream_with_const_default_preferences = basic_ostringstream<
     OstreamBaseT,
