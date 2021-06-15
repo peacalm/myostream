@@ -120,10 +120,18 @@ static_assert(std::is_same<std_basic_ostringstream_by_string<std::wstring>,
 template <typename StringT>
 struct default_preferences;
 
+/**
+ * @brief Instantiate a `default_preferences` with string type corresponding to
+ * OstreamBaseT.
+ */
 template <typename OstreamBaseT>
 using default_preferences_by_ostream_base =
     default_preferences<string_type_by_ostream<OstreamBaseT>>;
 
+/**
+ * @brief Instantiate a constant `default_preferences` with string type
+ * corresponding to OstreamBaseT.
+ */
 template <typename OstreamBaseT>
 using const_default_preferences_by_ostream_base = typename std::add_const<
     default_preferences_by_ostream_base<OstreamBaseT>>::type;
@@ -131,7 +139,7 @@ using const_default_preferences_by_ostream_base = typename std::add_const<
 /**
  * @brief Main output stream type for all containers.
  * @tparam OstreamBaseT Some basic output stream type like std::ostream,
- *     std::wostream, etc.
+ * std::wostream, etc.
  * @tparam PreferencesT Controls the output format.
  */
 template <typename OstreamBaseT,
@@ -139,6 +147,9 @@ template <typename OstreamBaseT,
               default_preferences_by_ostream_base<OstreamBaseT>>
 class basic_ostream;
 
+/**
+ * @brief Instantiate a `basic_ostream` with constant `default_preferences`.
+ */
 template <typename OstreamBaseT>
 using basic_ostream_with_const_default_preferences =
     basic_ostream<OstreamBaseT,
@@ -147,7 +158,7 @@ using basic_ostream_with_const_default_preferences =
 /**
  * @brief Derived from `basic_ostream`, but output to string.
  * @tparam OstreamBaseT Some basic output string stream type like
- *     std::ostringstream, std::wostringstream, etc.
+ * std::ostringstream, std::wostringstream, etc.
  * @tparam PreferencesT Controls the output format.
  */
 template <typename OstreamBaseT,
@@ -231,11 +242,11 @@ MYOSTREAM_DECLARE_OVERLOAD(multimap);
 MYOSTREAM_DECLARE_OVERLOAD(unordered_map);
 MYOSTREAM_DECLARE_OVERLOAD(unordered_multimap);
 
-/// Convert all `args` into std::string joined with `", "`.
+/// Convert all args into std::string joined with ", ".
 template <typename... Args>
 std::string tostr(const Args&... args);
 
-/// Convert all `args` into std::wstring joined with `L", "`.
+/// Convert all args into std::wstring joined with L", ".
 template <typename... Args>
 std::wstring towstr(const Args&... args);
 
