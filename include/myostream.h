@@ -15,6 +15,11 @@
 
 #pragma once
 
+/**
+ * @file myostream.h
+ * Convenient output for all item-iterable container types for C++.
+ */
+
 #include <array>
 #include <deque>
 #include <forward_list>
@@ -108,6 +113,10 @@ static_assert(std::is_same<std_basic_ostringstream_by_string<std::wstring>,
 
 // types
 
+/**
+ * @brief Default preferences on output format.
+ * @tparam StringT Some string type. e.g. std::string, std::wstring, etc.
+ */
 template <typename StringT>
 struct default_preferences;
 
@@ -119,6 +128,12 @@ template <typename OstreamBaseT>
 using const_default_preferences_by_ostream_base = typename std::add_const<
     default_preferences_by_ostream_base<OstreamBaseT>>::type;
 
+/**
+ * @brief Main output stream type for all containers.
+ * @tparam OstreamBaseT Some basic output stream type like std::ostream,
+ *     std::wostream, etc.
+ * @tparam PreferencesT Controls the output format.
+ */
 template <typename OstreamBaseT,
           typename PreferencesT =
               default_preferences_by_ostream_base<OstreamBaseT>>
@@ -129,6 +144,12 @@ using basic_ostream_with_const_default_preferences =
     basic_ostream<OstreamBaseT,
                   const_default_preferences_by_ostream_base<OstreamBaseT>>;
 
+/**
+ * @brief Derived from `basic_ostream`, but output to string.
+ * @tparam OstreamBaseT Some basic output string stream type like
+ *     std::ostringstream, std::wostringstream, etc.
+ * @tparam PreferencesT Controls the output format.
+ */
 template <typename OstreamBaseT,
           typename PreferencesT =
               default_preferences_by_ostream_base<OstreamBaseT>>
@@ -210,11 +231,11 @@ MYOSTREAM_DECLARE_OVERLOAD(multimap);
 MYOSTREAM_DECLARE_OVERLOAD(unordered_map);
 MYOSTREAM_DECLARE_OVERLOAD(unordered_multimap);
 
-//! convert all `args` into std::string joined with `", "`
+/// Convert all `args` into std::string joined with `", "`.
 template <typename... Args>
 std::string tostr(const Args&... args);
 
-//! convert all `args` into std::wstring joined with `L", "`
+/// Convert all `args` into std::wstring joined with `L", "`.
 template <typename... Args>
 std::wstring towstr(const Args&... args);
 
