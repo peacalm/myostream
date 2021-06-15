@@ -17,7 +17,7 @@
 
 /**
  * @file myostream.h
- * Convenient output for all item-iterable container types for C++.
+ * @brief Convenient output for all item-iterable container types for C++.
  */
 
 #include <array>
