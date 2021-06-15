@@ -175,11 +175,15 @@ using basic_ostringstream_with_const_default_preferences = basic_ostringstream<
     OstreamBaseT,
     const_default_preferences_by_ostream_base<OstreamBaseT>>;
 
+// Maybe mostly common used convenient ostream types.
 using ostream        = basic_ostream<std::ostream>;
 using wostream       = basic_ostream<std::wostream>;
 using ostringstream  = basic_ostringstream<std::ostringstream>;
 using wostringstream = basic_ostringstream<std::wostringstream>;
 
+/**
+ * @brief Instantiate a `basic_ostringstream` by StringT.
+ */
 template <typename StringT,
           typename PreferencesT = default_preferences<StringT>>
 using basic_ostringstream_by_string =
