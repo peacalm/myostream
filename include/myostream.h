@@ -14,6 +14,8 @@
 // =============================================================================
 
 #pragma once
+#ifndef MYOSTREAM_H_
+#define MYOSTREAM_H_
 
 /**
  * @file myostream.h
@@ -880,3 +882,5 @@ inline ResultStringT watch_to_string(const KvSepT&      kv_sep,
       kv_sep, param_sep, final_delim, #__VA_ARGS__, __VA_ARGS__)
 
 }  // namespace myostream
+
+#endif  // MYOSTREAM_H_
