@@ -268,7 +268,7 @@ std::string tostr(const Args&... args);
 template <typename... Args>
 std::wstring towstr(const Args&... args);
 
-/// Convert all args into std::string joined with ", ".
+/// Convert all args into std::string joined with ", ". ptostr: print to string.
 template <typename... Args>
 std::string ptostr(const Args&... args);
 
