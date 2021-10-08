@@ -128,22 +128,28 @@ Result:
 hello world, 123, [1, 2, 3]
 ```
 
-### Function: myostream::tostr(const Args&... args)
+### Function: myostream::ptostr(const Args&... args)
 One line code to convert multiple arguments into std::string, seperated by ", ".
 
 Example:
 ```c++
 std::vector<int> vi{1, 2, 3};
-std::cout << myostream::tostr("show \"tostr\"", vi) << std::endl;
+std::cout << myostream::ptostr("show \"ptostr\"", vi) << std::endl;
 ```
 Result:
 ```text
-show "tostr", [1, 2, 3]
+show "ptostr", [1, 2, 3]
 ```
 
-### Function: myostream::towstr(const Args&... args)
-All same as `myostream::tostr` except result into std::wstring and seperated 
+### Function: myostream::ptowstr(const Args&... args)
+All same as `myostream::ptostr` except result into std::wstring and seperated 
 by L", ".
+
+### Function: myostream::tostr(const Args&... args)
+Like `myostream::ptostr` but seperated by "".
+
+### Function: myostream::towstr(const Args&... args)
+Like `myostream::ptowstr` but seperated by L"".
 
 ### Macro: MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...)
 Print all variables in parameter `...` along with their names to `out_stream` 
