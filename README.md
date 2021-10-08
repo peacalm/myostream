@@ -129,7 +129,7 @@ hello world, 123, [1, 2, 3]
 ```
 
 ### Function: myostream::ptostr(const Args&... args)
-One line code to convert multiple arguments into std::string, seperated by ", ".
+One line code to convert multiple arguments into std::string, separated by ", ".
 
 Example:
 ```c++
@@ -142,14 +142,14 @@ show "ptostr", [1, 2, 3]
 ```
 
 ### Function: myostream::ptowstr(const Args&... args)
-All same as `myostream::ptostr` except result into std::wstring and seperated 
+All same as `myostream::ptostr` except result into std::wstring and separated 
 by L", ".
 
 ### Function: myostream::tostr(const Args&... args)
-Like `myostream::ptostr` but seperated by "".
+Like `myostream::ptostr` but separated by "".
 
 ### Function: myostream::towstr(const Args&... args)
-Like `myostream::ptowstr` but seperated by L"".
+Like `myostream::ptowstr` but separated by L"".
 
 ### Macro: MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...)
 Print all variables in parameter `...` along with their names to `out_stream` 

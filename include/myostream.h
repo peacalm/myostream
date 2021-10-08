@@ -116,6 +116,13 @@ static_assert(std::is_same<std_basic_ostringstream_by_string<std::wstring>,
 // types
 
 /**
+ * @brief Output format type with 3 members, left-border, separator, right-border.
+ * @tparam StringT Some string type. e.g. std::string, std::wstring, etc.
+ */
+template <typename StringT>
+struct ternary_format;
+
+/**
  * @brief Default preferences on output format.
  * @tparam StringT Some string type. e.g. std::string, std::wstring, etc.
  */
@@ -270,8 +277,6 @@ std::wstring ptowstr(const Args&... args);
 
 // ==================== definitions ====================
 
-namespace internal {
-
 template <typename StringT>
 struct ternary_format {
   using string_type = StringT;
@@ -321,13 +326,11 @@ struct ternary_format {
   string_type lb, sep, rb;
 };
 
-}  // namespace internal
-
 template <typename StringT>
 struct default_preferences {
   using string_type = StringT;
   using char_type   = typename string_type::value_type;
-  using format_type = internal::ternary_format<string_type>;
+  using format_type = ternary_format<string_type>;
 
   default_preferences() { reset(); }
 
