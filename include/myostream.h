@@ -252,13 +252,21 @@ MYOSTREAM_DECLARE_OVERLOAD(multimap);
 MYOSTREAM_DECLARE_OVERLOAD(unordered_map);
 MYOSTREAM_DECLARE_OVERLOAD(unordered_multimap);
 
-/// Convert all args into std::string joined with ", ".
+/// Convert all args into std::string joined with "".
 template <typename... Args>
 std::string tostr(const Args&... args);
 
-/// Convert all args into std::wstring joined with L", ".
+/// Convert all args into std::wstring joined with L"".
 template <typename... Args>
 std::wstring towstr(const Args&... args);
+
+/// Convert all args into std::string joined with ", ".
+template <typename... Args>
+std::string ptostr(const Args&... args);
+
+/// Convert all args into std::wstring joined with L", ".
+template <typename... Args>
+std::wstring ptowstr(const Args&... args);
 
 // ==================== definitions ====================
 
@@ -361,6 +369,8 @@ struct default_preferences {
 
                     print_fmt.with({   }, {',', ' '}, {   });
               print_range_fmt.with({   }, {',', ' '}, {   });
+
+                     none_fmt.with({   }, {        }, {   });
     // clang-format on
   }
 
@@ -392,6 +402,8 @@ struct default_preferences {
 
                     print_fmt.with({   }, {','}, {   });
               print_range_fmt.with({   }, {','}, {   });
+
+                     none_fmt.with({   }, {   }, {   });
     // clang-format on
   }
 
@@ -422,7 +434,9 @@ struct default_preferences {
       unordered_multimap_kv_fmt,
 
       print_fmt,
-      print_range_fmt;
+      print_range_fmt,
+
+      none_fmt;
   // clang-format on
 };
 
@@ -514,15 +528,27 @@ public:
 
   template <typename... Args>
   basic_ostream& print(const Args&... args) {
-    *this << preferences().print_fmt.lb;
-    __print(args...);
-    *this << preferences().print_fmt.rb;
+    print(preferences().print_fmt, args...);
+    return *this;
+  }
+
+  template <typename... Args>
+  basic_ostream& print(const format_type& fmt, const Args&... args) {
+    *this << fmt.lb;
+    __print(fmt, args...);
+    *this << fmt.rb;
     return *this;
   }
 
   template <typename... Args>
   basic_ostream& println(const Args&... args) {
     print(args...) << std::endl;
+    return *this;
+  }
+
+  template <typename... Args>
+  basic_ostream& println(const format_type& fmt, const Args&... args) {
+    print(fmt, args...) << std::endl;
     return *this;
   }
 
@@ -564,19 +590,21 @@ public:
   void clear_preferences_ptr() { set_preferences_ptr(nullptr); }
 
 private:
-  basic_ostream& __print() { return *this; }
+  basic_ostream& __print(const format_type& fmt) { return *this; }
 
   template <typename T>
-  basic_ostream& __print(const T& t) {
+  basic_ostream& __print(const format_type& fmt, const T& t) {
     *this << t;
     return *this;
   }
 
   template <typename T, typename... Args>
-  basic_ostream& __print(const T& t, const Args&... args) {
+  basic_ostream& __print(const format_type& fmt,
+                         const T&           t,
+                         const Args&... args) {
     *this << t;
-    *this << preferences().print_fmt.sep;
-    __print(args...);
+    *this << fmt.sep;
+    __print(fmt, args...);
     return *this;
   }
 
@@ -729,13 +757,35 @@ std::string tostr(const Args&... args) {
       basic_ostringstream_with_const_default_preferences<std::ostringstream>;
   oss_t oss(placeholder::with_preferences_ptr{},
             oss_t::preferences_type::cins_ptr());
-  oss.print(args...);
+  oss.print(oss.preferences().none_fmt, args...);
   oss.clear_preferences_ptr();
   return oss.str();
 }
 
 template <typename... Args>
 std::wstring towstr(const Args&... args) {
+  using oss_t =
+      basic_ostringstream_with_const_default_preferences<std::wostringstream>;
+  oss_t oss(placeholder::with_preferences_ptr{},
+            oss_t::preferences_type::cins_ptr());
+  oss.print(oss.preferences().none_fmt, args...);
+  oss.clear_preferences_ptr();
+  return oss.str();
+}
+
+template <typename... Args>
+std::string ptostr(const Args&... args) {
+  using oss_t =
+      basic_ostringstream_with_const_default_preferences<std::ostringstream>;
+  oss_t oss(placeholder::with_preferences_ptr{},
+            oss_t::preferences_type::cins_ptr());
+  oss.print(args...);
+  oss.clear_preferences_ptr();
+  return oss.str();
+}
+
+template <typename... Args>
+std::wstring ptowstr(const Args&... args) {
   using oss_t =
       basic_ostringstream_with_const_default_preferences<std::wostringstream>;
   oss_t oss(placeholder::with_preferences_ptr{},

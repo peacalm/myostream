@@ -42,6 +42,13 @@ TEST(Tostr, Containers) {
               "{1: 1, 1: 1}");
 }
 
+TEST(Tostr, Multi) {
+  EXPECT_TRUE(tostr(1, 2, 3) == "123");
+  EXPECT_TRUE(ptostr(1, 2, 3) == "1, 2, 3");
+  EXPECT_TRUE(tostr(std::make_pair(1, 2), std::make_tuple()) == "(1, 2)<>");
+  EXPECT_TRUE(ptostr(std::make_pair(1, 2), std::make_tuple()) == "(1, 2), <>");
+}
+
 TEST(Towstr, Containers) {
   EXPECT_TRUE(towstr(std::make_pair(1, 2)) == L"(1, 2)");
   EXPECT_TRUE(towstr(std::make_tuple()) == L"<>");
