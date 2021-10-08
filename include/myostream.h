@@ -116,7 +116,8 @@ static_assert(std::is_same<std_basic_ostringstream_by_string<std::wstring>,
 // types
 
 /**
- * @brief Output format type with 3 members, left-border, separator, right-border.
+ * @brief Output format type with 3 members, left-border, separator,
+ * right-border.
  * @tparam StringT Some string type. e.g. std::string, std::wstring, etc.
  */
 template <typename StringT>
