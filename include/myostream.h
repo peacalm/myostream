@@ -38,11 +38,16 @@
 #include <utility>
 #include <vector>
 
-namespace myostream {
+#ifndef MYOSTREAM_ASSERT
+#include <cassert>
+#define MYOSTREAM_ASSERT(x) assert(x)
+#endif  // MYOSTREAM_ASSERT
 
 #ifndef MYOSTREAM_PREFERENCES_RESET
 #define MYOSTREAM_PREFERENCES_RESET reset_default
-#endif
+#endif  // MYOSTREAM_PREFERENCES_RESET
+
+namespace myostream {
 
 // type traits
 
@@ -846,7 +851,7 @@ inline OstreamT&& watch_to_ostream_aux(OstreamT&&           oss,
                                        const StringVectorT& var_names,
                                        size_t               cur_idx,
                                        const FinalArgT&     final_arg) {
-  assert(cur_idx == var_names.size() - 1);
+  MYOSTREAM_ASSERT(cur_idx == var_names.size() - 1);
   oss << var_names[cur_idx];
   oss << kv_sep;
   oss << final_arg;
@@ -869,7 +874,7 @@ inline OstreamT&& watch_to_ostream_aux(OstreamT&&           oss,
                                        size_t               cur_idx,
                                        const FirstArgT&     first_arg,
                                        const Args&... other_args) {
-  assert(cur_idx < var_names.size());
+  MYOSTREAM_ASSERT(cur_idx < var_names.size());
   oss << var_names[cur_idx];
   oss << kv_sep;
   oss << first_arg;
@@ -898,7 +903,7 @@ inline OstreamT&& watch_to_ostream(OstreamT&&         oss,
   auto names =
       split_macro_param_names<typename std::decay<OstreamT>::type::string_type>(
           vars_name_line);
-  assert(names.size() == sizeof...(Args));
+  MYOSTREAM_ASSERT(names.size() == sizeof...(Args));
   if (names.empty()) return oss;
   watch_to_ostream_aux(oss, kv_sep, param_sep, final_delim, names, 0, args...);
   return oss;
