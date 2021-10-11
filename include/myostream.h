@@ -931,6 +931,8 @@ inline ResultStringT watch_to_string(const KvSepT&      kv_sep,
   return oss.str();
 }
 
+}  // namespace myostream
+
 #define MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...) \
   myostream::watch_to_ostream(                                           \
       out_stream, kv_sep, param_sep, final_delim, #__VA_ARGS__, __VA_ARGS__)
@@ -939,7 +941,5 @@ inline ResultStringT watch_to_string(const KvSepT&      kv_sep,
     string_type, kv_sep, param_sep, final_delim, ...) \
   myostream::watch_to_string<string_type>(            \
       kv_sep, param_sep, final_delim, #__VA_ARGS__, __VA_ARGS__)
-
-}  // namespace myostream
 
 #endif  // MYOSTREAM_H_
