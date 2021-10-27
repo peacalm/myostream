@@ -73,9 +73,17 @@ arguments, or a range of values designated by a pair of iterators:
 template <typename... Args>
 basic_ostream& print(const Args&... args);
 
+// print all args in specified format
+template <typename... Args>
+basic_ostream& print(const format_type& fmt, const Args&... args)
+
 // all same with "print" except put a std::endl at last
 template <typename... Args>
 basic_ostream& println(const Args&... args);
+
+// support specified format
+template <typename... Args>
+basic_ostream& println(const format_type& fmt, const Args&... args)
 
 // print values in range [begin, end) in some format, e.g. on default, with a 
 // separator ", "
@@ -146,10 +154,10 @@ All same as `myostream::ptostr` except result into std::wstring and separated
 by L", ".
 
 ### Function: myostream::tostr(const Args&... args)
-Like `myostream::ptostr` but separated by "".
+Like `myostream::ptostr` but separated by empty string "".
 
 ### Function: myostream::towstr(const Args&... args)
-Like `myostream::ptowstr` but separated by L"".
+Like `myostream::ptowstr` but separated by empty wstring L"".
 
 ### Macro: MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...)
 Print all variables in parameter `...` along with their names to `out_stream` 
