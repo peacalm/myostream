@@ -13,7 +13,6 @@
 // the License.
 // =============================================================================
 
-#pragma once
 #ifndef MYOSTREAM_H_
 #define MYOSTREAM_H_
 
