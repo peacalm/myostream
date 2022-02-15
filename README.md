@@ -218,7 +218,7 @@ si = {1, 2, 3}
 ## Install
 Install the lib to your computer:  
 ```shell script
-git clone https://github.com/TheLonelyHeracles/myostream.git
+git clone https://github.com/peacalm/myostream.git
 cd myostream
 mkdir build
 cd build
