@@ -344,8 +344,8 @@ struct default_preferences {
     return i;
   }
   static default_preferences*       ins_ptr() { return &ins(); }
-  static const default_preferences& cins() { return ins(); }
-  static const default_preferences* cins_ptr() { return &cins(); }
+  static const default_preferences& const_ins() { return ins(); }
+  static const default_preferences* const_ins_ptr() { return &const_ins(); }
 
   void reset() { MYOSTREAM_PREFERENCES_RESET(); }
 
@@ -378,7 +378,7 @@ struct default_preferences {
                     print_fmt.with({   }, {',', ' '}, {   });
               print_range_fmt.with({   }, {',', ' '}, {   });
 
-                     none_fmt.with({   }, {        }, {   });
+                     fake_fmt.with({   }, {        }, {   });
     // clang-format on
   }
 
@@ -411,7 +411,7 @@ struct default_preferences {
                     print_fmt.with({   }, {','}, {   });
               print_range_fmt.with({   }, {','}, {   });
 
-                     none_fmt.with({   }, {   }, {   });
+                     fake_fmt.with({   }, {   }, {   });
     // clang-format on
   }
 
@@ -444,7 +444,7 @@ struct default_preferences {
       print_fmt,
       print_range_fmt,
 
-      none_fmt;
+      fake_fmt;
   // clang-format on
 };
 
@@ -764,8 +764,8 @@ std::string tostr(const Args&... args) {
   using oss_t =
       basic_ostringstream_with_const_default_preferences<std::ostringstream>;
   oss_t oss(placeholder::with_preferences_ptr{},
-            oss_t::preferences_type::cins_ptr());
-  oss.print(oss.preferences().none_fmt, args...);
+            oss_t::preferences_type::const_ins_ptr());
+  oss.print(oss.preferences().fake_fmt, args...);
   oss.clear_preferences_ptr();
   return oss.str();
 }
@@ -775,8 +775,8 @@ std::wstring towstr(const Args&... args) {
   using oss_t =
       basic_ostringstream_with_const_default_preferences<std::wostringstream>;
   oss_t oss(placeholder::with_preferences_ptr{},
-            oss_t::preferences_type::cins_ptr());
-  oss.print(oss.preferences().none_fmt, args...);
+            oss_t::preferences_type::const_ins_ptr());
+  oss.print(oss.preferences().fake_fmt, args...);
   oss.clear_preferences_ptr();
   return oss.str();
 }
@@ -786,7 +786,7 @@ std::string ptostr(const Args&... args) {
   using oss_t =
       basic_ostringstream_with_const_default_preferences<std::ostringstream>;
   oss_t oss(placeholder::with_preferences_ptr{},
-            oss_t::preferences_type::cins_ptr());
+            oss_t::preferences_type::const_ins_ptr());
   oss.print(args...);
   oss.clear_preferences_ptr();
   return oss.str();
@@ -797,7 +797,7 @@ std::wstring ptowstr(const Args&... args) {
   using oss_t =
       basic_ostringstream_with_const_default_preferences<std::wostringstream>;
   oss_t oss(placeholder::with_preferences_ptr{},
-            oss_t::preferences_type::cins_ptr());
+            oss_t::preferences_type::const_ins_ptr());
   oss.print(args...);
   oss.clear_preferences_ptr();
   return oss.str();
@@ -923,7 +923,7 @@ inline ResultStringT watch_to_string(const KvSepT&      kv_sep,
       basic_ostringstream_by_string<string_type,
                                     const default_preferences<string_type>>;
   oss_t oss(placeholder::with_preferences_ptr{},
-            oss_t::preferences_type::cins_ptr());
+            oss_t::preferences_type::const_ins_ptr());
   watch_to_ostream(
       oss, kv_sep, param_sep, final_delim, vars_name_line, args...);
   oss.clear_preferences_ptr();
