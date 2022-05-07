@@ -73,10 +73,10 @@ What's more, there are useful pre-defined ostream types with default preferences
 * wostringstream = basic_ostringstream\<std::wostringstream>
 
 and with dense style:
-* ostream_dense = basic_ostream\<std::ostream, default_preferences_by_ostream_base<std::ostream, true>>;
-* wostream_dense = basic_ostream\<std::wostream, default_preferences_by_ostream_base<std::wostream, true>>;
-* ostringstream_dense = basic_ostringstream\<std::ostringstream, default_preferences_by_ostream_base<std::ostringstream, true>>;
-* wostringstream_dense = basic_ostringstream\<std::wostringstream, default_preferences_by_ostream_base<std::wostringstream, true>>;
+* ostream_dense = basic_ostream<std::ostream, default_preferences_by_ostream_base<std::ostream, true>>
+* wostream_dense = basic_ostream<std::wostream, default_preferences_by_ostream_base<std::wostream, true>>
+* ostringstream_dense = basic_ostringstream<std::ostringstream, default_preferences_by_ostream_base<std::ostringstream, true>>
+* wostringstream_dense = basic_ostringstream<std::wostringstream, default_preferences_by_ostream_base<std::wostringstream, true>>
 
 ### Details
 This lib overloads `operator<<` for the class `basic_ostream` with each 
