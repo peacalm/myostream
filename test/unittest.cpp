@@ -42,11 +42,61 @@ TEST(Tostr, Containers) {
               "{1: 1, 1: 1}");
 }
 
+TEST(TostrDense, Containers) {
+  EXPECT_TRUE(tostr_dense(std::make_pair(1, 2)) == "(1,2)");
+  EXPECT_TRUE(tostr_dense(std::make_tuple()) == "<>");
+  EXPECT_TRUE(tostr_dense(std::make_tuple(1, 2.5, "str")) == "<1,2.5,str>");
+
+  EXPECT_TRUE(tostr_dense(std::array<int, 3>{1, 2, 3}) == "[1,2,3]");
+  EXPECT_TRUE(tostr_dense(std::deque<int>{1, 2, 3}) == "[1,2,3]");
+  EXPECT_TRUE(tostr_dense(std::forward_list<int>{1, 2, 3}) == "[1,2,3]");
+  EXPECT_TRUE(tostr_dense(std::list<int>{1, 2, 3}) == "[1,2,3]");
+  EXPECT_TRUE(tostr_dense(std::initializer_list<int>{1, 2, 3}) == "[1,2,3]");
+  EXPECT_TRUE(tostr_dense(std::vector<int>{1, 2, 3}) == "[1,2,3]");
+
+  EXPECT_TRUE(tostr_dense(std::set<int>{1, 2, 3}) == "{1,2,3}");
+  EXPECT_TRUE(tostr_dense(std::multiset<int>{1, 2, 2}) == "{1,2,2}");
+  EXPECT_TRUE(tostr_dense(std::unordered_set<int>{1}) == "{1}");
+  EXPECT_TRUE(tostr_dense(std::unordered_multiset<int>{1, 1, 1}) == "{1,1,1}");
+
+  EXPECT_TRUE(tostr_dense(std::map<int, int>{{1, 1}, {2, 2}}) == "{1:1,2:2}");
+  EXPECT_TRUE(tostr_dense(std::unordered_map<int, int>{{1, 1}}) == "{1:1}");
+
+  EXPECT_TRUE(tostr_dense(std::multimap<int, int>{{1, 1}, {1, 1}}) ==
+              "{1:1,1:1}");
+  EXPECT_TRUE(tostr_dense(std::unordered_multimap<int, int>{{1, 1}, {1, 1}}) ==
+              "{1:1,1:1}");
+}
+
 TEST(Tostr, Multi) {
   EXPECT_TRUE(tostr(1, 2, 3) == "123");
   EXPECT_TRUE(ptostr(1, 2, 3) == "1, 2, 3");
   EXPECT_TRUE(tostr(std::make_pair(1, 2), std::make_tuple()) == "(1, 2)<>");
   EXPECT_TRUE(ptostr(std::make_pair(1, 2), std::make_tuple()) == "(1, 2), <>");
+  EXPECT_TRUE(
+      tostr(1, ";", 2, ";", std::vector<std::string>{"aa", "bb", "cc"}, "dd") ==
+      "1;2;[aa, bb, cc]dd");
+  EXPECT_TRUE(
+      ptostr(
+          1, ";", 2, ";", std::vector<std::string>{"aa", "bb", "cc"}, "dd") ==
+      "1, ;, 2, ;, [aa, bb, cc], dd");
+}
+
+TEST(TostrDense, Multi) {
+  EXPECT_TRUE(tostr_dense(1, 2, 3) == "123");
+  EXPECT_TRUE(ptostr_dense(1, 2, 3) == "1,2,3");
+  EXPECT_TRUE(tostr_dense(std::make_pair(1, 2), std::make_tuple()) ==
+              "(1,2)<>");
+  EXPECT_TRUE(ptostr_dense(std::make_pair(1, 2), std::make_tuple()) ==
+              "(1,2),<>");
+  EXPECT_TRUE(
+      tostr_dense(
+          1, ";", 2, ";", std::vector<std::string>{"aa", "bb", "cc"}, "dd") ==
+      "1;2;[aa,bb,cc]dd");
+  EXPECT_TRUE(
+      ptostr_dense(
+          1, ";", 2, ";", std::vector<std::string>{"aa", "bb", "cc"}, "dd") ==
+      "1,;,2,;,[aa,bb,cc],dd");
 }
 
 TEST(Towstr, Containers) {
@@ -78,19 +128,27 @@ TEST(Towstr, Containers) {
 TEST(Tostr, Complex) {
   std::vector<std::set<int>> vs{{1, 2}, {3, 4}};
   EXPECT_TRUE(tostr(vs) == "[{1, 2}, {3, 4}]");
+  EXPECT_TRUE(tostr_dense(vs) == "[{1,2},{3,4}]");
+
   std::map<int, std::set<int>> mis{{1, {1, 11}}, {2, {2, 22}}};
   EXPECT_TRUE(tostr(mis) == "{1: {1, 11}, 2: {2, 22}}");
+  EXPECT_TRUE(tostr_dense(mis) == "{1:{1,11},2:{2,22}}");
 
-  myostream::ostringstream oss;
+  myostream::ostringstream       oss;
+  myostream::ostringstream_dense oss_dense;
   EXPECT_TRUE(oss.print_range(mis.begin(), mis.end()).str() ==
               "(1, {1, 11}), (2, {2, 22})");
+  EXPECT_TRUE(oss_dense.print_range(mis.begin(), mis.end()).str() ==
+              "(1,{1,11}),(2,{2,22})");
 
   oss.clear_buf();
   EXPECT_TRUE(oss.print(vs[0]).str() == "{1, 2}");
 
   oss.clear_buf();
+  oss_dense.clear_buf();
   mis[1].insert(111);
   EXPECT_TRUE(oss.println(*mis.begin()).str() == "(1, {1, 11, 111})\n");
+  EXPECT_TRUE(oss_dense.println(*mis.begin()).str() == "(1,{1,11,111})\n");
 }
 
 TEST(Watch, Complex) {
@@ -106,4 +164,8 @@ TEST(Watch, Complex) {
   myostream::ostringstream oss;
   EXPECT_TRUE(MYOSTREAM_WATCH(oss, ": ", "; ", ";", vs, mis).str() ==
               "vs: [{1, 2}, {3, 4}]; mis: {1: {1, 11}, 2: {2, 22}};");
+
+  myostream::ostringstream_dense oss_dense;
+  EXPECT_TRUE(MYOSTREAM_WATCH(oss_dense, ": ", "; ", ";", vs, mis).str() ==
+              "vs: [{1,2},{3,4}]; mis: {1:{1,11},2:{2,22}};");
 }

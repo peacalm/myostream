@@ -42,10 +42,6 @@
 #define MYOSTREAM_ASSERT(x) assert(x)
 #endif  // MYOSTREAM_ASSERT
 
-#ifndef MYOSTREAM_PREFERENCES_RESET
-#define MYOSTREAM_PREFERENCES_RESET reset_default
-#endif  // MYOSTREAM_PREFERENCES_RESET
-
 namespace myostream {
 
 // type traits
@@ -130,25 +126,27 @@ struct ternary_format;
 /**
  * @brief Default preferences on output format.
  * @tparam StringT Some string type. e.g. std::string, std::wstring, etc.
+ * @tparam DenseStyle Whether use dense style which won't output spaces between
+ * items.
  */
-template <typename StringT>
+template <typename StringT, bool DenseStyle = false>
 struct default_preferences;
 
 /**
  * @brief Instantiate a `default_preferences` with string type corresponding to
  * OstreamBaseT.
  */
-template <typename OstreamBaseT>
+template <typename OstreamBaseT, bool DenseStyle = false>
 using default_preferences_by_ostream_base =
-    default_preferences<string_type_by_ostream<OstreamBaseT>>;
+    default_preferences<string_type_by_ostream<OstreamBaseT>, DenseStyle>;
 
 /**
  * @brief Instantiate a constant `default_preferences` with string type
  * corresponding to OstreamBaseT.
  */
-template <typename OstreamBaseT>
+template <typename OstreamBaseT, bool DenseStyle = false>
 using const_default_preferences_by_ostream_base = typename std::add_const<
-    default_preferences_by_ostream_base<OstreamBaseT>>::type;
+    default_preferences_by_ostream_base<OstreamBaseT, DenseStyle>>::type;
 
 /**
  * @brief Main output stream type for all containers.
@@ -164,10 +162,10 @@ class basic_ostream;
 /**
  * @brief Instantiate a `basic_ostream` with constant `default_preferences`.
  */
-template <typename OstreamBaseT>
-using basic_ostream_with_const_default_preferences =
-    basic_ostream<OstreamBaseT,
-                  const_default_preferences_by_ostream_base<OstreamBaseT>>;
+template <typename OstreamBaseT, bool DenseStyle = false>
+using basic_ostream_with_const_default_preferences = basic_ostream<
+    OstreamBaseT,
+    const_default_preferences_by_ostream_base<OstreamBaseT, DenseStyle>>;
 
 /**
  * @brief Derived from `basic_ostream`, but output to string.
@@ -184,16 +182,29 @@ class basic_ostringstream;
  * @brief Instantiate a `basic_ostringstream` with constant
  * `default_preferences`.
  */
-template <typename OstreamBaseT>
+template <typename OstreamBaseT, bool DenseStyle = false>
 using basic_ostringstream_with_const_default_preferences = basic_ostringstream<
     OstreamBaseT,
-    const_default_preferences_by_ostream_base<OstreamBaseT>>;
+    const_default_preferences_by_ostream_base<OstreamBaseT, DenseStyle>>;
 
 // Maybe mostly common used convenient ostream types.
 using ostream        = basic_ostream<std::ostream>;
 using wostream       = basic_ostream<std::wostream>;
 using ostringstream  = basic_ostringstream<std::ostringstream>;
 using wostringstream = basic_ostringstream<std::wostringstream>;
+
+using ostream_dense =
+    basic_ostream<std::ostream,
+                  default_preferences_by_ostream_base<std::ostream, true>>;
+using wostream_dense =
+    basic_ostream<std::wostream,
+                  default_preferences_by_ostream_base<std::wostream, true>>;
+using ostringstream_dense = basic_ostringstream<
+    std::ostringstream,
+    default_preferences_by_ostream_base<std::ostringstream, true>>;
+using wostringstream_dense = basic_ostringstream<
+    std::wostringstream,
+    default_preferences_by_ostream_base<std::wostringstream, true>>;
 
 /**
  * @brief Instantiate a `basic_ostringstream` by StringT.
@@ -280,6 +291,26 @@ std::string ptostr(const Args&... args);
 template <typename... Args>
 std::wstring ptowstr(const Args&... args);
 
+/// Convert all args into std::string joined with "". Preferences with dense
+/// style, means no spaces as separators.
+template <typename... Args>
+std::string tostr_dense(const Args&... args);
+
+/// Convert all args into std::wstring joined with L"". Preferences with dense
+/// style, means no spaces as separators.
+template <typename... Args>
+std::wstring towstr_dense(const Args&... args);
+
+/// Convert all args into std::string joined with ",". ptostr: print to string.
+/// Preferences with dense style, means no spaces as separators.
+template <typename... Args>
+std::string ptostr_dense(const Args&... args);
+
+/// Convert all args into std::wstring joined with L",". Preferences with dense
+/// style, means no spaces as separators.
+template <typename... Args>
+std::wstring ptowstr_dense(const Args&... args);
+
 // ==================== definitions ====================
 
 template <typename StringT>
@@ -332,24 +363,14 @@ struct ternary_format {
 };
 
 template <typename StringT>
-struct default_preferences {
+struct preferences_base {
   using string_type = StringT;
   using char_type   = typename string_type::value_type;
   using format_type = ternary_format<string_type>;
 
-  default_preferences() { reset(); }
+  preferences_base() {}
 
-  static default_preferences& ins() {
-    static default_preferences i;
-    return i;
-  }
-  static default_preferences*       ins_ptr() { return &ins(); }
-  static const default_preferences& cins() { return ins(); }
-  static const default_preferences* cins_ptr() { return &cins(); }
-
-  void reset() { MYOSTREAM_PREFERENCES_RESET(); }
-
-  void reset_default() {
+  void reset_sparse() {
     // clang-format off
                      pair_fmt.with({'('}, {',', ' '}, {')'});
                     tuple_fmt.with({'<'}, {',', ' '}, {'>'});
@@ -378,7 +399,7 @@ struct default_preferences {
                     print_fmt.with({   }, {',', ' '}, {   });
               print_range_fmt.with({   }, {',', ' '}, {   });
 
-                     none_fmt.with({   }, {        }, {   });
+                     fake_fmt.with({   }, {        }, {   });
     // clang-format on
   }
 
@@ -411,7 +432,7 @@ struct default_preferences {
                     print_fmt.with({   }, {','}, {   });
               print_range_fmt.with({   }, {','}, {   });
 
-                     none_fmt.with({   }, {   }, {   });
+                     fake_fmt.with({   }, {   }, {   });
     // clang-format on
   }
 
@@ -444,8 +465,37 @@ struct default_preferences {
       print_fmt,
       print_range_fmt,
 
-      none_fmt;
+      fake_fmt;
   // clang-format on
+};
+
+template <typename PreferencesT>
+class preferences_wrapper {
+  using preference_t = PreferencesT;
+
+public:
+  preferences_wrapper() { static_cast<preference_t*>(this)->reset(); }
+  static preference_t& ins() {
+    static preference_t i;
+    return i;
+  }
+  static preference_t*       ins_ptr() { return &ins(); }
+  static const preference_t& const_ins() { return ins(); }
+  static const preference_t* const_ins_ptr() { return &const_ins(); }
+};
+
+template <typename StringT, bool DenseStyle>
+struct default_preferences
+    : public preferences_base<StringT>,
+      public preferences_wrapper<default_preferences<StringT, DenseStyle>> {
+  void reset() { preferences_base<StringT>::reset_sparse(); }
+};
+
+template <typename StringT>
+struct default_preferences<StringT, true>
+    : public preferences_base<StringT>,
+      public preferences_wrapper<default_preferences<StringT, true>> {
+  void reset() { preferences_base<StringT>::reset_dense(); }
 };
 
 namespace internal {
@@ -759,48 +809,66 @@ MYOSTREAM_DEFINE_OVERLOAD_FOR_MAP(unordered_multimap)
 #undef MYOSTREAM_DEFINE_OVERLOAD
 #undef MYOSTREAM_DECLARE_OVERLOAD
 
-template <typename... Args>
-std::string tostr(const Args&... args) {
-  using oss_t =
-      basic_ostringstream_with_const_default_preferences<std::ostringstream>;
+template <typename OstreamBaseT, bool DenseStyle, typename... Args>
+string_type_by_ostream<OstreamBaseT> basic_tostr(const Args&... args) {
+  using oss_t = basic_ostringstream_with_const_default_preferences<OstreamBaseT,
+                                                                   DenseStyle>;
   oss_t oss(placeholder::with_preferences_ptr{},
-            oss_t::preferences_type::cins_ptr());
-  oss.print(oss.preferences().none_fmt, args...);
+            oss_t::preferences_type::const_ins_ptr());
+  oss.print(oss.preferences().fake_fmt, args...);
   oss.clear_preferences_ptr();
   return oss.str();
+}
+
+template <typename OstreamBaseT, bool DenseStyle, typename... Args>
+string_type_by_ostream<OstreamBaseT> basic_ptostr(const Args&... args) {
+  using oss_t = basic_ostringstream_with_const_default_preferences<OstreamBaseT,
+                                                                   DenseStyle>;
+  oss_t oss(placeholder::with_preferences_ptr{},
+            oss_t::preferences_type::const_ins_ptr());
+  oss.print(args...);
+  oss.clear_preferences_ptr();
+  return oss.str();
+}
+
+template <typename... Args>
+std::string tostr(const Args&... args) {
+  return basic_tostr<std::ostringstream, false>(args...);
 }
 
 template <typename... Args>
 std::wstring towstr(const Args&... args) {
-  using oss_t =
-      basic_ostringstream_with_const_default_preferences<std::wostringstream>;
-  oss_t oss(placeholder::with_preferences_ptr{},
-            oss_t::preferences_type::cins_ptr());
-  oss.print(oss.preferences().none_fmt, args...);
-  oss.clear_preferences_ptr();
-  return oss.str();
+  return basic_tostr<std::wostringstream, false>(args...);
 }
 
 template <typename... Args>
 std::string ptostr(const Args&... args) {
-  using oss_t =
-      basic_ostringstream_with_const_default_preferences<std::ostringstream>;
-  oss_t oss(placeholder::with_preferences_ptr{},
-            oss_t::preferences_type::cins_ptr());
-  oss.print(args...);
-  oss.clear_preferences_ptr();
-  return oss.str();
+  return basic_ptostr<std::ostringstream, false>(args...);
 }
 
 template <typename... Args>
 std::wstring ptowstr(const Args&... args) {
-  using oss_t =
-      basic_ostringstream_with_const_default_preferences<std::wostringstream>;
-  oss_t oss(placeholder::with_preferences_ptr{},
-            oss_t::preferences_type::cins_ptr());
-  oss.print(args...);
-  oss.clear_preferences_ptr();
-  return oss.str();
+  return basic_ptostr<std::wostringstream, false>(args...);
+}
+
+template <typename... Args>
+std::string tostr_dense(const Args&... args) {
+  return basic_tostr<std::ostringstream, true>(args...);
+}
+
+template <typename... Args>
+std::wstring towstr_dense(const Args&... args) {
+  return basic_tostr<std::wostringstream, true>(args...);
+}
+
+template <typename... Args>
+std::string ptostr_dense(const Args&... args) {
+  return basic_ptostr<std::ostringstream, true>(args...);
+}
+
+template <typename... Args>
+std::wstring ptowstr_dense(const Args&... args) {
+  return basic_ptostr<std::wostringstream, true>(args...);
 }
 
 // ==================== watch ====================
@@ -923,7 +991,7 @@ inline ResultStringT watch_to_string(const KvSepT&      kv_sep,
       basic_ostringstream_by_string<string_type,
                                     const default_preferences<string_type>>;
   oss_t oss(placeholder::with_preferences_ptr{},
-            oss_t::preferences_type::cins_ptr());
+            oss_t::preferences_type::const_ins_ptr());
   watch_to_ostream(
       oss, kv_sep, param_sep, final_delim, vars_name_line, args...);
   oss.clear_preferences_ptr();

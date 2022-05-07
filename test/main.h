@@ -24,4 +24,9 @@ extern myostream::ostream  mycerr;
 extern myostream::wostream mywcout;
 extern myostream::wostream mywcerr;
 
+extern myostream::ostream_dense  mycout_dense;
+extern myostream::ostream_dense  mycerr_dense;
+extern myostream::wostream_dense mywcout_dense;
+extern myostream::wostream_dense mywcerr_dense;
+
 #define watch(...) MYOSTREAM_WATCH(mycout, " = ", "\n", "\n\n", __VA_ARGS__)

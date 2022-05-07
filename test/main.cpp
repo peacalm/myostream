@@ -20,11 +20,22 @@ myostream::ostream  mycerr(std::cerr.rdbuf());
 myostream::wostream mywcout(std::wcout.rdbuf());
 myostream::wostream mywcerr(std::wcerr.rdbuf());
 
+myostream::ostream_dense  mycout_dense(std::cout.rdbuf());
+myostream::ostream_dense  mycerr_dense(std::cerr.rdbuf());
+myostream::wostream_dense mywcout_dense(std::wcout.rdbuf());
+myostream::wostream_dense mywcerr_dense(std::wcerr.rdbuf());
+
 int main(int argc, char** argv) {
   mycout << "mycout:  testing myostream!\n";
   mycerr << "mycerr:  testing myostream!\n";
   mywcout << "mywcout: testing myostream!\n";
   mywcerr << "mywcerr: testing myostream!\n";
+
+  mycout_dense << "mycout_dense:  testing myostream!\n";
+  mycerr_dense << "mycerr_dense:  testing myostream!\n";
+  mywcout_dense << "mywcout_dense: testing myostream!\n";
+  mywcerr_dense << "mywcerr_dense: testing myostream!\n";
+
   std::cout << std::endl;
 
   ::testing::InitGoogleTest(&argc, argv);

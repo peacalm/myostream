@@ -26,8 +26,26 @@ Supported container or container-like types:
 * std::unordered_map
 * std::unordered_multimap
 
+For output result string, this lib supports std::string, std::wstring, or any
+string type specialized by template std::basic_string<CharT, Traits, Allc>.
 
 ## Introduction
+
+
+### Struct: default_preferences<StringT, DenseStyle = false>
+Preferences control output style.  
+StringT: Some string type. e.g. std::string, std::wstring, or string type 
+specialized by template std::basic_string<CharT, Traits, Allc>.  
+DenseStyle: Bool parameter, use dense style or sparse style. Dense style means 
+won't output spaces between items. For example, for `vector<int>{1,2,3}`,
+if set DenseStyle=true, we get `[1,2,3]`, or we get `[1, 2, 3]` if DenseStyle=false.
+Sparse style as default value.
+
+What's more, user can modify each container's output style by this preferences
+struct. For each container, there are 3 parameters to describe the style, they are
+left-border, separator, right-border. For above example, default style for
+`vector<int>{1,2,3}`, the left-border is `"["`, right-border is `"]"`, and 
+separator is `", "` for sparse style or `","` for dense style.
 
 ### Class: myostream::basic_ostream<OstreamBaseT, PreferencesT=default_preferences>
 You need to put at least an `OstreamBaseT` into the first template parameter 
@@ -48,12 +66,17 @@ string representing the output result. e.g.
 `myostream::basic_ostringstream<std::ostream>` will get a compile error.
 
 ### Pre-defined convenient types
-What's more, there are useful pre-defined ostream types with 
-default preferences:
+What's more, there are useful pre-defined ostream types with default preferences:
 * ostream  = basic_ostream\<std::ostream>
 * wostream = basic_ostream\<std::wostream>
 * ostringstream  = basic_ostringstream\<std::ostringstream>
 * wostringstream = basic_ostringstream\<std::wostringstream>
+
+and with dense style:
+* ostream_dense = basic_ostream\<std::ostream, default_preferences_by_ostream_base<std::ostream, true>>;
+* wostream_dense = basic_ostream\<std::wostream, default_preferences_by_ostream_base<std::wostream, true>>;
+* ostringstream_dense = basic_ostringstream\<std::ostringstream, default_preferences_by_ostream_base<std::ostringstream, true>>;
+* wostringstream_dense = basic_ostringstream\<std::wostringstream, default_preferences_by_ostream_base<std::wostringstream, true>>;
 
 ### Details
 This lib overloads `operator<<` for the class `basic_ostream` with each 
@@ -136,25 +159,50 @@ Result:
 hello world, 123, [1, 2, 3]
 ```
 
-### Function: myostream::tostr(const Args&... args)
+### Function: tostr function family
+
+#### template <typename... Args> tostr(const Args&... args)
 One line code to convert multiple arguments into std::string, separated by "".
+
+#### template <typename... Args> towstr(const Args&... args)
+All same as `myostream::tostr` except result into std::wstring.
+
+#### template <typename... Args> ptostr(const Args&... args)
+One line code to convert multiple arguments into std::string, separated by ", ".
+
+#### template <typename... Args> ptowstr(const Args&... args)
+All same as `myostream::ptostr` except result into std::wstring and separated 
+by L", ".
+
+#### template <typename... Args> tostr_dense(const Args&... args)
+One line code to convert multiple arguments into std::string, separated by "".
+Use preferences with dense style.
+
+#### template <typename... Args> towstr_dense(const Args&... args)
+All same as `myostream::tostr_dense` except result into std::wstring.
+Use preferences with dense style.
+
+#### template <typename... Args> ptostr_dense(const Args&... args)
+One line code to convert multiple arguments into std::string, separated by ",".
+Use preferences with dense style.
+
+#### template <typename... Args> ptowstr_dense(const Args&... args)
+All same as `myostream::ptostr_dense` except result into std::wstring and separated 
+by L",".
+Use preferences with dense style.
+
 
 Example:
 ```c++
 std::vector<int> vi{1, 2, 3};
 std::cout << myostream::tostr("show \"tostr\": ", vi, ", ok?") << std::endl;
+std::cout << myostream::tostr_dense("show \"tostr_dense\": ", vi, ", ok?") << std::endl;
 ```
 Result:
 ```text
 show "tostr": [1, 2, 3], ok?
+show "tostr_dense": [1,2,3], ok?
 ```
-
-### Function: myostream::towstr(const Args&... args)
-All same as `myostream::tostr` except result into std::wstring.
-
-
-### Function: myostream::ptostr(const Args&... args)
-One line code to convert multiple arguments into std::string, separated by ", ".
 
 Example:
 ```c++
@@ -166,9 +214,6 @@ Result:
 show "ptostr", [1, 2, 3], 123
 ```
 
-### Function: myostream::ptowstr(const Args&... args)
-All same as `myostream::ptostr` except result into std::wstring and separated 
-by L", ".
 
 ### Macro: MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...)
 Print all variables in parameter `...` along with their names to `out_stream` 
