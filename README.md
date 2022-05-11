@@ -161,32 +161,32 @@ hello world, 123, [1, 2, 3]
 
 ### Function: tostr function family
 
-#### template <typename... Args> tostr(const Args&... args)
+* template <typename... Args> tostr(const Args&... args)  
 One line code to convert multiple arguments into std::string, separated by "".
 
-#### template <typename... Args> towstr(const Args&... args)
+* template <typename... Args> towstr(const Args&... args)  
 All same as `myostream::tostr` except result into std::wstring.
 
-#### template <typename... Args> ptostr(const Args&... args)
+* template <typename... Args> ptostr(const Args&... args)  
 One line code to convert multiple arguments into std::string, separated by ", ".
 
-#### template <typename... Args> ptowstr(const Args&... args)
+* template <typename... Args> ptowstr(const Args&... args)  
 All same as `myostream::ptostr` except result into std::wstring and separated 
 by L", ".
 
-#### template <typename... Args> tostr_dense(const Args&... args)
+* template <typename... Args> tostr_dense(const Args&... args)  
 One line code to convert multiple arguments into std::string, separated by "".
 Use preferences with dense style.
 
-#### template <typename... Args> towstr_dense(const Args&... args)
+* template <typename... Args> towstr_dense(const Args&... args)  
 All same as `myostream::tostr_dense` except result into std::wstring.
 Use preferences with dense style.
 
-#### template <typename... Args> ptostr_dense(const Args&... args)
+* template <typename... Args> ptostr_dense(const Args&... args)  
 One line code to convert multiple arguments into std::string, separated by ",".
 Use preferences with dense style.
 
-#### template <typename... Args> ptowstr_dense(const Args&... args)
+* template <typename... Args> ptowstr_dense(const Args&... args)  
 All same as `myostream::ptostr_dense` except result into std::wstring and separated 
 by L",".
 Use preferences with dense style.
@@ -214,11 +214,12 @@ Result:
 show "ptostr", [1, 2, 3], 123
 ```
 
-
-### Macro: MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...)
+### Macro Definition: watch family
+* Macro: MYOSTREAM_WATCH(out_stream, kv_sep, param_sep, final_delim, ...)  
 Print all variables in parameter `...` along with their names to `out_stream` 
 in format "var1-name kv_sep var1-value param_sep var2-name kv_sep var2-value 
 param_sep ... final_delim".
+
 
 Example:
 ```c++
@@ -239,7 +240,7 @@ std::set<int>{1,2,3} = {1, 2, 3}
 "strings" = strings
 ```
 
-### Macro: MYOSTREAM_WATCH_TO_STRING(string_type, kv_sep, param_sep, final_delim, ...)
+* Macro: MYOSTREAM_WATCH_TO_STRING(string_type, kv_sep, param_sep, final_delim, ...)  
 Like `MYOSTREAM_WATCH`, but convert the result to string with type 
 `string_type`.
 
