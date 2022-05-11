@@ -26,6 +26,7 @@ myostream::wostream_dense mywcout_dense(std::wcout.rdbuf());
 myostream::wostream_dense mywcerr_dense(std::wcerr.rdbuf());
 
 int main(int argc, char** argv) {
+  std::cout << "std::cout: __cplusplus = " << __cplusplus << std::endl;
   mycout << "mycout:  testing myostream!\n";
   mycerr << "mycerr:  testing myostream!\n";
   mywcout << "mywcout: testing myostream!\n";

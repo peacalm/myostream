@@ -967,9 +967,9 @@ inline OstreamT&& watch_to_ostream(OstreamT&&         oss,
                                    const FinalDelimT& final_delim,
                                    const std::string& vars_name_line,
                                    const Args&... args) {
-  auto names =
-      split_macro_param_names<typename std::decay<OstreamT>::type::string_type>(
-          vars_name_line);
+  auto names = split_macro_param_names<
+      string_type_by_ostream<typename std::decay<OstreamT>::type>>(
+      vars_name_line);
   MYOSTREAM_ASSERT(names.size() == sizeof...(Args));
   if (names.empty()) return oss;
   watch_to_ostream_aux(oss, kv_sep, param_sep, final_delim, names, 0, args...);
