@@ -229,6 +229,7 @@ int i = 123;
 std::set<int> si{1,2,3};
 watch(i, 123, si, std::set<int>{1,2,3}, "strings");
 ```
+
 Result:
 ```text
 i = 123
@@ -244,11 +245,19 @@ Like `MYOSTREAM_WATCH`, but convert the result to string with type
 
 Example:
 ```c++
+#define watch(...) std::cout << MYOSTREAM_WATCH_TO_STRING(std::string, " = ", "\n", "\n\n", __VA_ARGS__)
+
 int i = 123;
 std::set<int> si{1,2,3};
-std::cout << MYOSTREAM_WATCH_TO_STRING(std::string, ':', '\n', "\n----\n", i, si, 123);
-std::wcout << MYOSTREAM_WATCH_TO_STRING(std::wstring, L" = ", '\n', '\n', i, si, 123);
+std::cout << MYOSTREAM_WATCH_TO_STRING(std::string, ":", "\n", "\n----\n", i, si, 123);
+std::wcout << MYOSTREAM_WATCH_TO_STRING(std::wstring, L" = ", "\n", "\n", i, si, 123);
+
+double d = 1.4;
+std::vector<int> vi(si.begin(), si.end());
+watch(d, i, si, vi);
+
 ```
+
 Result:
 ```text
 i:123
@@ -258,6 +267,10 @@ si:{1, 2, 3}
 i = 123
 si = {1, 2, 3}
 123 = 123
+d = 1.4
+i = 123
+si = {1, 2, 3}
+vi = [1, 2, 3]
 ```
 
 ## Install
