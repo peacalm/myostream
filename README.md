@@ -284,6 +284,7 @@ cd build
 cmake ..
 make install
 ```
+Package name is "MyOStream" which can be used in cmake, e.g. `find_package(MyOStream REQUIRED)`.
 Then happy coding with `#include <myostream.h>`.
 
 ## Test
