@@ -2,4 +2,4 @@ cmake_minimum_required(VERSION 3.14)
 
 set(MyOStream_INCLUDE_DIR "@INCLUDE_INSTALL_DIR@")
 
-message(STATUS "MyOStream found. Headers = ${MyOStream_INCLUDE_DIR}")
+message(STATUS "MyOStream found. Headers at ${MyOStream_INCLUDE_DIR}")
