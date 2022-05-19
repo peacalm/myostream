@@ -1,4 +1,9 @@
 # MyOStream: Extension for std::basic_ostream in C++
+
+![Build](https://github.com/peacalm/myostream/actions/workflows/cmake.yml/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+
 This lib supports convenient output for all item-iterable container types and 
 their composited types, and supports mutable preferences which specify the 
 output format.
