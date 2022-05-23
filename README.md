@@ -1,6 +1,6 @@
 # MyOStream: Extension for std::basic_ostream in C++
 
-![Build](https://github.com/peacalm/myostream/actions/workflows/cmake.yml/badge.svg)
+[![Build](https://github.com/peacalm/myostream/actions/workflows/cmake.yml/badge.svg)](https://github.com/peacalm/myostream/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 
