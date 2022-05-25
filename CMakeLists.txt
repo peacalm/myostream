@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.14)
 project(MyOStream
         VERSION 2.9
-        DESCRIPTION "MyOStream header-only lib.")
+        DESCRIPTION "MyOStream header-only lib."
+        HOMEPAGE_URL "https://github.com/peacalm/myostream")
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
