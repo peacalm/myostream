@@ -3,6 +3,7 @@
 [![Build](https://github.com/peacalm/myostream/actions/workflows/cmake.yml/badge.svg)](https://github.com/peacalm/myostream/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+[[中文博文链接]](http://lishuangquan.cn/post/2022/myostream/)
 
 This lib supports convenient output for all item-iterable container types and 
 their composited types, and supports mutable preferences which specify the 
