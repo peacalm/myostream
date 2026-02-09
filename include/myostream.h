@@ -883,6 +883,15 @@ inline std::vector<ResultStringT> split_macro_param_names(
     bool found_bracket = false;
     for (const auto& p : {"()", "<>", "{}", "[]"}) {
       if (s[i] != p[0]) continue;
+      auto find_match = [&](size_t j) {
+        int sum = 0;
+        do {
+          if (s[j] == p[0]) --sum;
+          if (s[j] == p[1]) ++sum;
+        } while (sum != 0 && j < n);
+        return j;
+      };
+      if (s[i] == '<' && find_match(i) >= n) continue;
       found_bracket = true;
       for (int sum = 0;; ++i) {
         oss << s[i];
