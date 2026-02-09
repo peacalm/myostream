@@ -882,14 +882,13 @@ inline std::vector<ResultStringT> split_macro_param_names(
   for (size_t i = 0, n = s.size(); i < n; ++i) {
     bool found_bracket = false;
     for (const auto& p : {"()", "<>", "{}", "[]"}) {
-      if (s[i] == p[0]) {
-        found_bracket = true;
-        for (int sum = 0;; ++i) {
-          oss << s[i];
-          if (s[i] == p[0]) --sum;
-          if (s[i] == p[1]) ++sum;
-          if (sum == 0) break;
-        }
+      if (s[i] != p[0]) continue;
+      found_bracket = true;
+      for (int sum = 0;; ++i) {
+        oss << s[i];
+        if (s[i] == p[0]) --sum;
+        if (s[i] == p[1]) ++sum;
+        if (sum == 0) break;
       }
     }
     if (found_bracket) continue;
