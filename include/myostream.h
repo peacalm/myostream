@@ -874,17 +874,25 @@ std::wstring ptowstr_dense(const Args&... args) {
 // ==================== watch ====================
 
 template <typename ResultStringT>
-inline std::vector<ResultStringT> split_macro_param_names(
-    const std::string& s) {
+inline std::vector<ResultStringT> split_macro_param_names(const std::string& s,
+                                                          size_t expect_size) {
   using str_t = ResultStringT;
   std_basic_ostringstream_by_string<str_t> oss;
   std::vector<str_t>                       ret;
+  bool                                     maybe_less_op = false;
   for (size_t i = 0, n = s.size(); i < n; ++i) {
     bool found_bracket = false;
     for (const auto& p : {"()", "<>", "{}", "[]"}) {
       if (s[i] != p[0]) continue;
+      if (s[i] == '<') {
+        if (i + 1 < n && (s[i + 1] == '<' || s[i + 1] == '=')) {
+          oss << s[i++];
+          break;
+        }
+        maybe_less_op = true;
+      }
       found_bracket = true;
-      for (int sum = 0;; ++i) {
+      for (int sum = 0; i < n; ++i) {
         oss << s[i];
         if (s[i] == p[0]) --sum;
         if (s[i] == p[1]) ++sum;
@@ -901,6 +909,10 @@ inline std::vector<ResultStringT> split_macro_param_names(
     }
   }
   ret.push_back(oss.str());
+  if (ret.size() != expect_size && maybe_less_op) {
+    throw std::runtime_error("try putting angle brackets in parenthesis");
+  }
+  MYOSTREAM_ASSERT(ret.size() == expect_size);
   return ret;
 }
 
@@ -968,8 +980,7 @@ inline OstreamT&& watch_to_ostream(OstreamT&&         oss,
                                    const Args&... args) {
   auto names = split_macro_param_names<
       string_type_by_ostream<typename std::decay<OstreamT>::type>>(
-      vars_name_line);
-  MYOSTREAM_ASSERT(names.size() == sizeof...(Args));
+      vars_name_line, sizeof...(Args));
   if (names.empty()) return oss;
   watch_to_ostream_aux(oss, kv_sep, param_sep, final_delim, names, 0, args...);
   return oss;
