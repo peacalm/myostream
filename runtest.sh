@@ -7,4 +7,4 @@ mkdir -p build
 cd build
 cmake .. -DBUILD_TEST=TRUE
 make
-ctest
+ctest --rerun-failed --output-on-failure
