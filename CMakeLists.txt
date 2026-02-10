@@ -28,5 +28,7 @@ configure_file("${PROJECT_NAME}Config.cmake.in" "${PROJECT_NAME}Config.cmake"
         @ONLY)
 install(FILES "${CMAKE_SOURCE_DIR}/include/myostream.h"
         DESTINATION ${INCLUDE_INSTALL_DIR})
+install(FILES "${CMAKE_SOURCE_DIR}/include/myostream_watch.h"
+        DESTINATION ${INCLUDE_INSTALL_DIR})
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
         DESTINATION ${CMAKECONFIG_INSTALL_DIR})
