@@ -975,7 +975,8 @@ inline std::vector<ResultStringT> split_macro_param_names(const std::string& s,
   }
   ret.push_back(oss.str());
   if (ret.size() != expect_size && maybe_less_op) {
-    throw std::runtime_error("try putting angle brackets(maybe less operator) in parenthesis");
+    throw std::runtime_error(
+        "try putting angle brackets(maybe less operator) in parenthesis");
   }
   MYOSTREAM_ASSERT(ret.size() == expect_size);
   return ret;
