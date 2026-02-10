@@ -165,15 +165,35 @@ TEST(Watch, Complex) {
             "vs: [{1,2},{3,4}]; mis: {1:{1,11},2:{2,22}};");
 }
 
+
 TEST(Watch, Operator) {
-  int a = 1, b = 2;
+  int a = 1, b = 2, c = 3;
 
   EXPECT_EQ(MYOSTREAM_WATCH_TO_STRING(std::string, " = ", ", ", "", a == b),
             "a == b = 0");
-
   EXPECT_EQ(MYOSTREAM_WATCH_TO_STRING(std::string, " = ", ", ", "", a != b),
             "a != b = 1");
-
+  EXPECT_EQ(MYOSTREAM_WATCH_TO_STRING(std::string, " = ", ", ", "", a > b),
+            "a > b = 0");
+  EXPECT_EQ(MYOSTREAM_WATCH_TO_STRING(std::string, " = ", ", ", "", a < b),
+            "a < b = 1");
   EXPECT_EQ(MYOSTREAM_WATCH_TO_STRING(std::string, " = ", ", ", "", a | b),
             "a | b = 3");
+
+  EXPECT_EQ(
+      MYOSTREAM_WATCH_TO_STRING(std::string, " = ", ", ", "", c > b && a < b),
+      "c > b && a < b = 1");
+  EXPECT_EQ(
+      MYOSTREAM_WATCH_TO_STRING(std::string, " = ", ", ", "", a < b && c > b),
+      "a < b && c > b = 1");
+
+  EXPECT_EQ(MYOSTREAM_WATCH_TO_STRING(
+                std::string, " = ", ", ", "", std::array<int, (1 > 0)>{1}),
+            "std::array<int, (1 > 0)>{1} = [1]");
+  EXPECT_EQ(MYOSTREAM_WATCH_TO_STRING(
+                std::string, " = ", ", ", "", std::array<int, (0 < 1)>{1}),
+            "std::array<int, (0 < 1)>{1} = [1]");
+  EXPECT_EQ(MYOSTREAM_WATCH_TO_STRING(
+                std::string, " = ", ", ", "", std::array<int, 0 <= 1>{1}),
+            "std::array<int, 0 <= 1>{1} = [1]");
 }
