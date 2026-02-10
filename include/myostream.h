@@ -955,11 +955,10 @@ inline std::vector<ResultStringT> split_macro_param_names(const std::string& s,
       if (must_not_left_angle_bracket(i)) {
         oss << s[i++];
       } else {
-        size_t j = find_matched_angle_bracket(i);
+        maybe_less_op = true;
+        size_t j      = find_matched_angle_bracket(i);
         if (j < n) {
           while (i < j) { oss << s[i++]; }
-        } else {
-          maybe_less_op = true;
         }
       }
     }
