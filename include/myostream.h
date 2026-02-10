@@ -879,29 +879,91 @@ template <typename ResultStringT>
 inline std::vector<ResultStringT> split_macro_param_names(const std::string& s,
                                                           size_t expect_size) {
   using str_t = ResultStringT;
-  std_basic_ostringstream_by_string<str_t> oss;
-  std::vector<str_t>                       ret;
-  bool                                     maybe_less_op = false;
-  for (size_t i = 0, n = s.size(); i < n; ++i) {
-    bool found_bracket = false;
-    for (const auto& p : {"()", "<>", "{}", "[]"}) {
-      if (s[i] != p[0]) continue;
+  using oss_t = std_basic_ostringstream_by_string<str_t>;
+  oss_t              oss;
+  std::vector<str_t> ret;
+  size_t             n             = s.size();
+  bool               maybe_less_op = false;
+
+  // for ()/{}/[], not for <>
+  // start with s[i] == pair[0]
+  auto find_matched_bracket = [&](size_t i, const char* pair) {
+    MYOSTREAM_ASSERT(i < n && pair && s[i] == pair[0]);
+    for (int sum = 0; i < n; ++i) {
+      if (s[i] == pair[0])
+        --sum;
+      else if (s[i] == pair[1])
+        ++sum;
+      if (sum == 0) break;
+    }
+    return i;
+  };
+
+  auto must_not_left_angle_bracket = [&](const size_t i) {
+    MYOSTREAM_ASSERT(i < n && s[i] == '<');
+    // less or equal "<="
+    if (i + 1 < n && s[i + 1] == '=') return true;
+    // left shift "<<"
+    if (i + 1 < n && s[i + 1] == '<' || i >= 1 && s[i - 1] == '<') return true;
+    return false;
+  };
+
+  auto must_not_right_angle_bracket = [&](const size_t i) {
+    MYOSTREAM_ASSERT(i < n && s[i] == '>');
+    // greater or equal ">="
+    if (i + 1 < n && s[i + 1] == '=') return true;
+    return false;
+  };
+
+  // start with s[i] == '<'
+  auto find_matched_angle_bracket = [&](size_t i) {
+    MYOSTREAM_ASSERT(i < n && s[i] == '<');
+    for (int sum = 0;; ++i) {
       if (s[i] == '<') {
-        if (i + 1 < n && (s[i + 1] == '<' || s[i + 1] == '=')) {
-          oss << s[i++];
-          break;
-        }
-        maybe_less_op = true;
+        if (!must_not_left_angle_bracket(i)) --sum;
+      } else if (s[i] == '>') {
+        if (!must_not_right_angle_bracket(i)) ++sum;
+      } else if (s[i] == '(') {
+        i = find_matched_bracket(i, "()");
+      } else if (s[i] == '{') {
+        i = find_matched_bracket(i, "{}");
+      } else if (s[i] == '[') {
+        i = find_matched_bracket(i, "[]");
       }
+      if (sum == 0 || i >= n) break;
+    }
+    return i;
+  };
+
+  for (size_t i = 0; i < n; ++i) {
+    bool found_bracket = false;
+    for (const auto& p : {"()", "{}", "[]"}) {
+      if (s[i] != p[0]) continue;
       found_bracket = true;
       for (int sum = 0; i < n; ++i) {
         oss << s[i];
-        if (s[i] == p[0]) --sum;
-        if (s[i] == p[1]) ++sum;
+        if (s[i] == p[0])
+          --sum;
+        else if (s[i] == p[1])
+          ++sum;
         if (sum == 0) break;
       }
     }
     if (found_bracket) continue;
+
+    if (s[i] == '<') {
+      if (must_not_left_angle_bracket(i)) {
+        oss << s[i++];
+      } else {
+        size_t j = find_matched_angle_bracket(i);
+        if (j < n) {
+          while (i < j) { oss << s[i++]; }
+        } else {
+          maybe_less_op = true;
+        }
+      }
+    }
+
     if (s[i] == ',') {
       auto v = oss.str();
       while (!v.empty() && v.back() == ' ') v.pop_back();
@@ -914,7 +976,7 @@ inline std::vector<ResultStringT> split_macro_param_names(const std::string& s,
   }
   ret.push_back(oss.str());
   if (ret.size() != expect_size && maybe_less_op) {
-    throw std::runtime_error("try putting angle brackets in parenthesis");
+    throw std::runtime_error("try putting angle brackets(maybe less operator) in parenthesis");
   }
   MYOSTREAM_ASSERT(ret.size() == expect_size);
   return ret;
