@@ -165,7 +165,6 @@ TEST(Watch, Complex) {
             "vs: [{1,2},{3,4}]; mis: {1:{1,11},2:{2,22}};");
 }
 
-
 TEST(Watch, Operator) {
   int a = 1, b = 2, c = 3;
 
