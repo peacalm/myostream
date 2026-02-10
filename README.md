@@ -265,6 +265,25 @@ si = {1, 2, 3}
 vi = [1, 2, 3]
 ```
 
+
+#### Use watch to debug for ACMer/OIer
+
+Since online judgers usually have a pre-defined macro `ONLINE_JUDGE`,
+so we can only enable watch locally to output variables, and let it do nothing 
+when the program is running on online judger.
+
+```C++
+#ifndef ONLINE_JUDGE
+#include <myostream.h>
+myostream::ostream mycout(std::cout.rdbuf());
+#define watch(...) MYOSTREAM_WATCH(mycout, " = ", "\n", "\n\n", __VA_ARGS__)
+#else
+#define watch(...)
+#endif
+
+// then happy to use watch to debug arbitrarily...
+```
+
 ## Install
 Install the lib to your computer:  
 ```shell script
