@@ -901,7 +901,9 @@ inline std::vector<ResultStringT> split_macro_param_names(const std::string& s,
     }
     if (found_bracket) continue;
     if (s[i] == ',') {
-      ret.push_back(oss.str());
+      auto v = oss.str();
+      while (!v.empty() && v.back() == ' ') v.pop_back();
+      ret.push_back(std::move(v));
       oss.str(str_t{});
       while (i + 1 < n && s[i + 1] == ' ') ++i;
     } else {
