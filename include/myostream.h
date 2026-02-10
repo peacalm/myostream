@@ -37,10 +37,12 @@
 #include <utility>
 #include <vector>
 
-#ifndef MYOSTREAM_ASSERT
+#ifdef MYOSTREAM_NO_ASSERT
+#define MYOSTREAM_ASSERT(x) ((void)0)
+#else
 #include <cassert>
 #define MYOSTREAM_ASSERT(x) assert(x)
-#endif  // MYOSTREAM_ASSERT
+#endif  // MYOSTREAM_NO_ASSERT
 
 namespace myostream {
 
