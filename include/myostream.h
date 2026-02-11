@@ -126,6 +126,14 @@ template <typename StringT>
 struct ternary_format;
 
 /**
+ * @brief Definitions of all `ternary_format` members required for a preferences
+ * type.
+ * @tparam StringT Some string type. e.g. std::string, std::wstring, etc.
+ */
+template <typename StringT>
+struct preferences_base;
+
+/**
  * @brief Default preferences on output format.
  * @tparam StringT Some string type. e.g. std::string, std::wstring, etc.
  * @tparam DenseStyle Whether use dense style which won't output spaces between
