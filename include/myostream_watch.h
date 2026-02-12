@@ -20,7 +20,7 @@
 
 #include "myostream.h"
 
-#ifndef DISABLE_MYOSTREAM_watch
+#ifndef DISABLE_MYOSTREAM_PREDEFINED_watch
 
 #define watch(...)                        \
   std::cout << MYOSTREAM_WATCH_TO_STRING( \
