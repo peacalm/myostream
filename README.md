@@ -281,7 +281,7 @@ myostream::ostream mycout(std::cout.rdbuf());
 #define watch(...)
 #endif
 
-// then happy to use watch to debug arbitrarily...
+// then happy using watch to debug arbitrarily...
 ```
 
 ## Install
