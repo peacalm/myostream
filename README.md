@@ -266,7 +266,7 @@ vi = [1, 2, 3]
 ```
 
 
-#### Use watch to debug for ACMer/OIer
+#### Use watch to debug for ACMer/OIer, or local test for C++ learning
 
 Since online judgers usually have a pre-defined macro `ONLINE_JUDGE`,
 so we can only enable watch locally to output variables, and let it do nothing 
@@ -283,6 +283,22 @@ myostream::ostream mycout(std::cout.rdbuf());
 
 // then happy using watch to debug arbitrarily...
 ```
+
+Sugar for this kind of offline local test scenarios:
+
+There I added a header file `myostream_watch.h` at branch "watch"
+(this is informal, so I didn't merge it into the master branch) 
+and added the macro `watch` in it. 
+So you just need one line code of include to use this `watch` to debug:
+
+```C++
+#include <myostream_watch.h>
+
+// then happy to use watch to debug arbitrarily...
+```
+
+Don't forget to checkout to watch branch when installing this lib if you like the sugar. 
+
 
 ## Install
 Install the lib to your computer:  
