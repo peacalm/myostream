@@ -17,8 +17,8 @@ Supported container or container-like types:
 `std::set`, `std::multiset`, `std::unordered_set`, `std::unordered_multiset`, 
 `std::map`, `std::multimap`, `std::unordered_map`, `std::unordered_multimap`. 
 
-For the output result type of string, this lib supports std::string, std::wstring, or any
-string type specialized by template std::basic_string<CharT, Traits, Allc>.
+For the output result type of string, this lib supports `std::string`, `std::wstring`, or any
+string type specialized by template `std::basic_string<CharT, Traits, Allc>`.
 
 ## Introduction
 
