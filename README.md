@@ -17,7 +17,7 @@ Supported container or container-like types:
 `std::set`, `std::multiset`, `std::unordered_set`, `std::unordered_multiset`, 
 `std::map`, `std::multimap`, `std::unordered_map`, `std::unordered_multimap`. 
 
-For output result string, this lib supports std::string, std::wstring, or any
+For the output result type of string, this lib supports std::string, std::wstring, or any
 string type specialized by template std::basic_string<CharT, Traits, Allc>.
 
 ## Introduction
@@ -272,6 +272,8 @@ Since online judgers usually have a pre-defined macro `ONLINE_JUDGE`,
 so we can only enable watch locally to output variables, and let it do nothing 
 when the program is running on online judger.
 
+Add this code segment at header of your code:
+
 ```C++
 #ifndef ONLINE_JUDGE
 #include <myostream.h>
@@ -305,6 +307,7 @@ Install the lib to your computer:
 ```shell script
 git clone https://github.com/peacalm/myostream.git
 cd myostream
+# checkout to branch watch if you like
 mkdir build
 cd build
 cmake ..
